@@ -123,7 +123,7 @@
       <details class="text-xs pt-1">
         <summary class="text-slate-400 cursor-pointer hover:text-slate-200">⚙️ Zarządzaj bazą Szafy (Dodaj nowy przedmiot na stałe)</summary>
         <div class="mt-3 space-y-3 p-3 bg-slate-900/80 rounded-xl border border-slate-800">
-          <input type="text" id="newItemName" placeholder="Nazwa nowego sprzętu (np. Spodnie, Koszulki)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          <input type="text" id="newItemName" placeholder="Nazwa przedmiotu (np. Spodnie, Koszulki)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
           <select id="newItemPocket" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
             <option value="Plecak">Plecak</option>
             <option value="Komora Boczna">Komora Boczna (Drobne)</option>
@@ -134,15 +134,20 @@
             <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
           </select>
 
-          <!-- Wybór reguły ilościowej -->
-          <div id="ratioSetupArea">
-            <label class="block text-[11px] text-slate-400 mb-1">Przelicznik ilości na dni:</label>
-            <select id="newItemRatioRule" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
-              <option value="fixed">Stała ilość (Zawsze 1 szt.)</option>
-              <option value="daily">1 sztuka na każdy dzień (1:1)</option>
-              <option value="rot2">Rotacja: 1 sztuka co 2.5 dnia (np. spodnie / dresy)</option>
-              <option value="shirts">Koszule/Koszulki (wskaźnik 0.8 / dzień)</option>
-            </select>
+          <!-- Dynamiczne pole wyboru przelicznika z płynnym okienkiem ułamkowym -->
+          <div id="ratioSetupArea" class="space-y-1">
+            <label class="block text-[11px] text-slate-400">Przelicznik ilości na dni:</label>
+            <div class="flex gap-2">
+              <select id="newItemRatioRule" onchange="toggleCustomRatioInput()" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+                <option value="fixed">Stała ilość (Zawsze 1 szt.)</option>
+                <option value="daily">1:1 (1 na każdy dzień)</option>
+                <option value="custom">Rotacja / Wskaźnik customowy</option>
+              </select>
+              <input type="number" id="newItemCustomVal" value="2.5" step="0.1" min="0.1" placeholder="np. 2.5" class="w-20 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-2 text-white text-center font-bold hidden">
+            </div>
+            <p id="ratioHint" class="text-[10px] text-slate-500 italic hidden pt-1">
+              Wpisz wskaźnik (np. <b class="text-emerald-400">2.5</b> = 1 para co 2.5 dnia; <b class="text-emerald-400">0.8</b> = zliczanie koszulek).
+            </p>
           </div>
 
           <button type="button" onclick="addNewWardrobeDefinition()" class="w-full py-2 bg-slate-800 border border-slate-700 text-emerald-400 font-semibold rounded-lg hover:bg-slate-700">Zapisz nowy przedmiot w Szafie</button>
@@ -217,9 +222,9 @@
     function loadWardrobe() {
       var saved = localStorage.getItem('packtactics_wardrobe');
       return saved ? JSON.parse(saved) : [
-        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed" },
-        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed" },
-        { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "rot2" }
+        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 1 },
+        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 1 },
+        { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "custom", customVal: 2.5 }
       ];
     }
     function saveWardrobe() { localStorage.setItem('packtactics_wardrobe', JSON.stringify(customWardrobe)); }
@@ -250,6 +255,19 @@
 
       populateWardrobeDropdown();
       drawChecklist();
+    }
+
+    function toggleCustomRatioInput() {
+      var rule = document.getElementById('newItemRatioRule').value;
+      var inp = document.getElementById('newItemCustomVal');
+      var hint = document.getElementById('ratioHint');
+      if(rule === 'custom') {
+        inp.classList.remove('hidden');
+        hint.classList.remove('hidden');
+      } else {
+        inp.classList.add('hidden');
+        hint.classList.add('hidden');
+      }
     }
 
     function clickTag(t) {
@@ -311,9 +329,11 @@
       var n = document.getElementById('newItemName').value;
       var p = document.getElementById('newItemPocket').value;
       var rule = document.getElementById('newItemRatioRule').value;
+      var customVal = parseFloat(document.getElementById('newItemCustomVal').value) || 1;
+      
       if(!n) return;
       
-      var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, rule: rule };
+      var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, rule: rule, customVal: customVal };
       customWardrobe.push(itemObj);
       saveWardrobe();
       
@@ -343,7 +363,8 @@
         var item = filtered[j];
         var div = document.createElement('div');
         div.className = "flex justify-between items-center text-[11px] text-slate-400 py-0.5";
-        div.innerHTML = '<span>' + item.item + '</span><button type="button" onclick="permanentlyDeleteWardrobeItem(' + item.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
+        var ruleTxt = (item.rule === 'custom') ? ' [wskaźnik: ' + item.customVal + ']' : (item.rule === 'daily' ? ' [1:1]' : '');
+        div.innerHTML = '<span>' + item.item + ruleTxt + '</span><button type="button" onclick="permanentlyDeleteWardrobeItem(' + item.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
         delBox.appendChild(div);
       }
     }
@@ -392,19 +413,20 @@
       drawChecklist();
     }
 
-    // Obliczanie ilości przedmiotów na podstawie wybranej reguły ułamkowej/skalowej
+    // Elastyczny przelicznik ilościowy z zaokrąglaniem
     function computeQuantity(item) {
       if(curMode !== 'trip') return null;
       
-      // Standardowe przedmioty wielokrotne
+      // Standardowe przedmioty wbudowane (1:1)
       if(item.tag === 'wyjazd_multi') return numDays;
 
-      // Przedmioty ze Szafy wg reguł
+      // Przedmioty z Szafy
       if(item.rule === 'daily') return numDays;
-      if(item.rule === 'rot2') return Math.ceil(numDays / 2.5); // np. 5 dni / 2.5 = 2 pary; 7 dni / 2.5 = 2.8 -> 3 pary
-      if(item.rule === 'shirts') return Math.round(numDays * 0.8); // np. 5 dni -> 4 koszulki; 7 dni -> 6 koszulek
+      if(item.rule === 'custom' && item.customVal > 0) {
+        return Math.max(1, Math.round(numDays / item.customVal));
+      }
       
-      return null; // dla 'fixed' oraz zwykłych sztuk
+      return null;
     }
 
     function drawChecklist() {
@@ -486,7 +508,7 @@
 
       var pct = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
       document.getElementById('progressPercent').innerText = pct + '%';
-      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressBar'].style.width = pct + '%';
     }
 
     function calcTimers() {
