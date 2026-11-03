@@ -38,15 +38,15 @@
       </div>
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">--:--</span>
+          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">00h 00m</span>
           <span class="text-[10px] text-slate-400">Wyjazd</span>
         </div>
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="gathTimer" class="block text-lg font-bold text-sky-400">--:--</span>
+          <span id="gathTimer" class="block text-lg font-bold text-sky-400">00h 00m</span>
           <span class="text-[10px] text-slate-400">Zbiórka</span>
         </div>
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="matchTimer" class="block text-lg font-bold text-emerald-400">--:--</span>
+          <span id="matchTimer" class="block text-lg font-bold text-emerald-400">00h 00m</span>
           <span class="text-[10px] text-slate-400">Mecz</span>
         </div>
       </div>
@@ -185,8 +185,6 @@
       { id: 110, item: "Notes / Zeszyt", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" }
     ];
 
-    var db = loadDb();
-
     function loadDb() {
       var saved = localStorage.getItem('packtactics_db');
       if(saved) {
@@ -194,6 +192,8 @@
       }
       return defaultDb;
     }
+
+    var db = loadDb();
 
     function saveDb() {
       localStorage.setItem('packtactics_db', JSON.stringify(db));
@@ -285,6 +285,13 @@
       drawChecklist();
     }
 
+    function deleteItem(id) {
+      db = db.filter(function(i) { return i.id !== id; });
+      delete checkedSet[id];
+      saveDb();
+      drawChecklist();
+    }
+
     function toggleBox(id) {
       if(checkedSet[id]) delete checkedSet[id];
       else checkedSet[id] = true;
@@ -339,10 +346,13 @@
             lbl = o.item + ' (' + numDays + ' szt.)';
           }
 
-          html += '<label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/50 cursor-pointer transition">' +
+          html += '<div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition">' +
+            '<label class="flex items-start gap-3 cursor-pointer flex-1 mr-2">' +
             '<input type="checkbox" ' + (isC ? 'checked' : '') + ' onchange="toggleBox(' + o.id + ')" class="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900">' +
             '<div><span class="text-sm block ' + (isC ? 'line-through text-slate-500' : 'text-slate-200') + '">' + lbl + '</span></div>' +
-            '</label>';
+            '</label>' +
+            '<button type="button" onclick="deleteItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń przedmiot">✕</button>' +
+            '</div>';
         }
 
         html += '</div>';
