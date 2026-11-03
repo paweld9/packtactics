@@ -80,7 +80,7 @@
       </div>
     </details>
 
-    <!-- Trip Settings (Hidden by default) -->
+    <!-- Trip Settings -->
     <div id="tripSetupCard" class="glass rounded-2xl p-4 hidden">
       <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Parametry Wyjazdu</h2>
       <div class="flex justify-between items-center text-xs mb-3">
@@ -97,6 +97,12 @@
         </button>
         <button onclick="toggleTag('wieczor')" id="tag-wieczor" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
           🔥 Chłodne wieczory
+        </button>
+        <button onclick="toggleTag('gory')" id="tag-gory" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+          🏔️ Góry
+        </button>
+        <button onclick="toggleTag('jafowy')" id="tag-jafowy" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+          📖 Jafowy
         </button>
       </div>
     </div>
@@ -130,14 +136,18 @@
         <select id="newItemPocket" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
           <option value="Komora Boczna">Komora Boczna (Drobne)</option>
           <option value="Komora Główna">Komora Główna (Sprzęt & Ubrania)</option>
-          <option value="Dolna Komora (Spód)">Dolna Komora (Spód)</option>
+          <option value="Kosmetyczka">Kosmetyczka / Dolna Komora</option>
           <option value="Pojemniki & Nawodnienie">Pojemniki & Nawodnienie</option>
+          <option value="Ubrania Wyjazdowe">Ubrania Wyjazdowe</option>
+          <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
         </select>
         <select id="newItemTag" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
           <option value="baza">Baza (Zawsze)</option>
           <option value="zimno">Zimno (#zimno)</option>
           <option value="deszcz">Deszcz (#deszcz)</option>
-          <option value="wyjazd">Wyjazd (#wyjazd)</option>
+          <option value="wyjazd_multi">Wyjazd (#wyjazd)</option>
+          <option value="gory">Góry (#gory)</option>
+          <option value="jafowy">Jafowy (#jafowy)</option>
         </select>
         <button onclick="addCustomItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy</button>
       </div>
@@ -163,171 +173,25 @@
     let tripDays = 3;
 
     let database = [
-      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pocket: "Dolna Komora (Spód)", tag: "baza", mode: "all" },
-      { id: 2, item: "Soczewki w etui + Krople do oczu", pocket: "Komora Boczna", tag: "baza", mode: "all" },
-      { id: 3, item: "Kluczyki + Telefon + Zegarek", pocket: "Komora Boczna", tag: "baza", mode: "all" },
-      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pocket: "Komora Boczna", tag: "baza", mode: "match" },
-      { id: 5, item: "Maść rozgrzewająca", pocket: "Komora Boczna", tag: "zimno", mode: "match" },
-      { id: 6, item: "Korki Lanki (FG)", pocket: "Komora Główna", tag: "fg", mode: "match" },
-      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pocket: "Komora Główna", tag: "ag", mode: "match" },
-      { id: 8, item: "Korki Wkręty / Mixy (SG)", pocket: "Komora Główna", tag: "sg", mode: "match" },
-      { id: 9, item: "Klapki pod prysznic", pocket: "Komora Główna", tag: "baza", mode: "all" },
-      { id: 10, item: "Getry + Ochraniacze + Spodenki", pocket: "Komora Główna", tag: "baza", mode: "match" },
-      { id: 11, item: "Bielizna termoaktywna + Komin", pocket: "Komora Główna", tag: "zimno", mode: "match" },
-      { id: 12, item: "Rękawiczki meczowe + Czapka", pocket: "Komora Główna", tag: "zimno", mode: "match" },
-      // ORTALION ZARÓWNO NA ZIMNO JAK I DESZCZ
-      { id: 13, item: "Ortalion / Kurtka przeciwdeszczowa", pocket: "Komora Główna", tag: "deszcz_lub_zimno", mode: "match" },
-      { id: 14, item: "Zapasowa para getrów/skarpet", pocket: "Komora Główna", tag: "deszcz", mode: "match" },
-      { id: 15, item: "Pojemniki z jedzeniem", pocket: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
-      { id: 16, item: "Bidon z izotonikiem", pocket: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
+      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pocketMatch: "Dolna Komora (Spód)", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
+      { id: 2, item: "Soczewki w etui + Krople do oczu", pocketMatch: "Komora Boczna", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
+      { id: 3, item: "Kluczyki + Telefon + Zegarek", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "all" },
+      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "match" },
+      { id: 5, item: "Maść rozgrzewająca", pocketMatch: "Komora Boczna", pocketTrip: "Kosmetyczka", tag: "zimno", mode: "match" },
+      { id: 6, item: "Korki Lanki (FG)", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "fg", mode: "match" },
+      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "ag", mode: "match" },
+      { id: 8, item: "Korki Wkręty / Mixy (SG)", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "sg", mode: "match" },
+      { id: 9, item: "Klapki pod prysznic", pocketMatch: "Komora Główna", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
+      { id: 10, item: "Getry + Ochraniacze + Spodenki", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "baza", mode: "match" },
+      { id: 11, item: "Bielizna termoaktywna + Komin", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "zimno", mode: "match" },
+      { id: 12, item: "Rękawiczki meczowe + Czapka", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "zimno", mode: "match" },
+      { id: 13, item: "Ortalion / Kurtka przeciwdeszczowa", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "deszcz_lub_zimno", mode: "match" },
+      { id: 14, item: "Zapasowa para getrów/skarpet", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "deszcz", mode: "match" },
+      { id: 15, item: "Pojemniki z jedzeniem", pocketMatch: "Pojemniki & Nawodnienie", pocketTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
+      { id: 16, item: "Bidon z izotonikiem", pocketMatch: "Pojemniki & Nawodnienie", pocketTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
       
       // Wyjazdy
-      { id: 101, item: "Koszulki / T-shirty", pocket: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
-      { id: 102, item: "Bielizna + Skarpety", pocket: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
-      { id: 103, item: "Kąpielówki + Ręcznik plażowy", pocket: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
-      { id: 104, item: "Gruba bluza + Ciepłe dresy", pocket: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
-      { id: 105, item: "Ładowarka + Powerbank", pocket: "Komora Boczna", tag: "baza", mode: "trip" }
-    ];
-
-    let activeTags = new Set(["baza", "fg"]);
-    let checkedItems = new Set();
-
-    function toggleMode(mode) {
-      currentMode = mode;
-      document.getElementById('btn-mode-match').className = mode === 'match' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
-      document.getElementById('btn-mode-trip').className = mode === 'trip' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
-
-      document.getElementById('countdownCard').style.display = mode === 'match' ? 'block' : 'none';
-      document.getElementById('timeSetupDetails').style.display = mode === 'match' ? 'block' : 'none';
-      document.getElementById('matchTagsCard').style.display = mode === 'match' ? 'block' : 'none';
-      document.getElementById('tripSetupCard').style.display = mode === 'trip' ? 'block' : 'none';
-
-      renderChecklist();
-    }
-
-    function changeDays(delta) {
-      tripDays = Math.max(1, tripDays + delta);
-      document.getElementById('daysCount').innerText = tripDays;
-      renderChecklist();
-    }
-
-    function toggleTag(tag) {
-      if(tag === 'ag' || tag === 'sg') { activeTags.delete('fg'); activeTags.delete('ag'); activeTags.delete('sg'); }
-      if(activeTags.has(tag)) activeTags.delete(tag);
-      else activeTags.add(tag);
-      if(!activeTags.has('ag') && !activeTags.has('sg')) activeTags.add('fg');
-      
-      updateTagUI();
-      renderChecklist();
-    }
-
-    function updateTagUI() {
-      ['zimno', 'deszcz', 'ag', 'sg', 'plazawoda', 'wieczor'].forEach(t => {
-        const btn = document.getElementById(`tag-${t}`);
-        if(btn) {
-          if(activeTags.has(t)) btn.className = "p-2.5 rounded-xl border text-left bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold";
-          else btn.className = "p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400";
-        }
-      });
-    }
-
-    function addCustomItem() {
-      const name = document.getElementById('newItemName').value;
-      const pocket = document.getElementById('newItemPocket').value;
-      const tag = document.getElementById('newItemTag').value;
-
-      if(!name) return;
-
-      const newItem = { id: Date.now(), item: name, pocket: pocket, tag: tag, mode: 'all' };
-      database.push(newItem);
-      document.getElementById('newItemName').value = '';
-      renderChecklist();
-    }
-
-    function renderChecklist() {
-      const container = document.getElementById('checklistContainer');
-      container.innerHTML = '';
-
-      const filtered = database.filter(i => {
-        if (i.mode !== 'all' && i.mode !== currentMode) return false;
-        if (i.tag === 'baza') return true;
-        if (i.tag === 'deszcz_lub_zimno') return activeTags.has('deszcz') || activeTags.has('zimno');
-        return activeTags.has(i.tag) || (currentMode === 'trip' && i.tag === 'wyjazd_multi');
-      });
-
-      const grouped = {};
-      filtered.forEach(item => {
-        if(!grouped[item.pocket]) grouped[item.pocket] = [];
-        grouped[item.pocket].push(item);
-      });
-
-      let total = filtered.length;
-      let checkedCount = 0;
-
-      Object.keys(grouped).forEach(pocket => {
-        const section = document.createElement('div');
-        section.className = 'glass rounded-2xl p-4';
-        
-        let html = `<h3 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">${pocket}</h3><div class="space-y-2">`;
-        
-        grouped[pocket].forEach(i => {
-          const isChecked = checkedItems.has(i.id);
-          if(isChecked) checkedCount++;
-          
-          let displayLabel = i.item;
-          if(currentMode === 'trip' && i.tag === 'wyjazd_multi') {
-            displayLabel = `${i.item} (${tripDays} szt.)`;
-          }
-
-          html += `
-            <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/50 cursor-pointer transition">
-              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${i.id})" class="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900">
-              <div>
-                <span class="text-sm block ${isChecked ? 'line-through text-slate-500' : 'text-slate-200'}">${displayLabel}</span>
-              </div>
-            </label>
-          `;
-        });
-
-        html += `</div>`;
-        section.innerHTML = html;
-        container.appendChild(section);
-      });
-
-      const pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
-      document.getElementById('progressPercent').innerText = `${pct}%`;
-      document.getElementById('progressBar').style.width = `${pct}%`;
-    }
-
-    function toggleCheck(id) {
-      if(checkedItems.has(id)) checkedItems.delete(id);
-      else checkedItems.add(id);
-      renderChecklist();
-    }
-
-    function updateTimers() {
-      const now = new Date();
-      ['Leave', 'Gath', 'Match'].forEach(type => {
-        const val = document.getElementById(`input${type}`).value;
-        if(!val) return;
-        const [h, m] = val.split(':');
-        const target = new Date();
-        target.setHours(h, m, 0);
-        
-        let diff = target - now;
-        if(diff < 0) diff += 24 * 3600 * 1000;
-        
-        const hrs = Math.floor(diff / (1000 * 3600));
-        const mins = Math.floor((diff % (1000 * 3600)) / (1000 * 60));
-        
-        document.getElementById(`${type.toLowerCase()}Timer`).innerText = `${hrs}h ${mins}m`;
-      });
-    }
-
-    updateTagUI();
-    renderChecklist();
-    updateTimers();
-    setInterval(updateTimers, 60000);
-  </script>
-</body>
-</html>
+      { id: 101, item: "Koszulki / T-shirty", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
+      { id: 102, item: "Bielizna + Skarpety", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
+      { id: 103, item: "Kąpielówki + Ręcznik plażowy", pocketMatch: "Akcesoria Wyjazdowe", pocketTrip: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
+      { id: 104, item: "Gruba bluza + Ciepłe dresy", pocketMatch: "U
