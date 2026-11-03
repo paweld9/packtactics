@@ -4,19 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PackTactics</title>
-  <!-- Nazwa aplikacji po dodaniu na ekran główny -->
-  <meta name="apple-mobile-web-app-title" content="PackTactics">
-  <meta name="application-name" content="PackTactics">
-  <!-- Tryb pełnoekranowy (ukrywa pasek URL przeglądarki) -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <!-- Ikona aplikacji dla iOS i Androida -->
-  <!-- Podmień URL poniżej na link do swojej własnej grafiki/logo (np. 180x180 px w PNG) -->
-  <link rel="apple-touch-icon" href="./icon.png">
-<link rel="icon" type="image/png" href="./icon.png">
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-  
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -43,26 +30,38 @@
 
   <main class="p-4 max-w-md mx-auto space-y-5">
     
-    <!-- Matchday Countdown Card -->
-    <div id="countdownCard" class="glass rounded-2xl p-4 shadow-xl">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Odliczanie do Wyjazdu</h2>
-        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Live</span>
+    <!-- Matchday Card (Apple Lockscreen Clock vs 3 Timery) -->
+    <div id="countdownCard" class="glass rounded-2xl p-5 shadow-xl text-center">
+      
+      <!-- Opcja A: Zegar w stylu ekranu blokady macOS -->
+      <div id="appleClockBox" class="py-2 space-y-1">
+        <p id="appleClockDate" class="text-xs font-medium text-slate-400 capitalize">Poniedziałek, 12 Maja</p>
+        <h2 id="appleClockTime" class="text-6xl font-light tracking-tight text-slate-100 font-mono">00:00</h2>
+        <p class="text-[10px] text-slate-500 pt-1">Brak ustalonych godzin meczowych</p>
       </div>
-      <div class="grid grid-cols-3 gap-2 text-center">
-        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">0m</span>
-          <span class="text-[10px] text-slate-400">Wyjazd</span>
+
+      <!-- Opcja B: 3 Timery meczowe (widoczne po wpisaniu godzin) -->
+      <div id="matchTimersBox" class="hidden">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Odliczanie Meczowe</h2>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">Live</span>
         </div>
-        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="gathTimer" class="block text-lg font-bold text-sky-400">0m</span>
-          <span class="text-[10px] text-slate-400">Zbiórka</span>
-        </div>
-        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="matchTimer" class="block text-lg font-bold text-emerald-400">0m</span>
-          <span class="text-[10px] text-slate-400">Mecz</span>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+            <span id="leaveTimer" class="block text-lg font-bold text-amber-400">0m</span>
+            <span class="text-[10px] text-slate-400">Wyjazd</span>
+          </div>
+          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+            <span id="gathTimer" class="block text-lg font-bold text-sky-400">0m</span>
+            <span class="text-[10px] text-slate-400">Zbiórka</span>
+          </div>
+          <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+            <span id="matchTimer" class="block text-lg font-bold text-emerald-400">0m</span>
+            <span class="text-[10px] text-slate-400">Mecz</span>
+          </div>
         </div>
       </div>
+
     </div>
 
     <!-- Match Settings -->
@@ -83,15 +82,15 @@
 
         <div class="flex justify-between items-center">
           <label class="text-slate-400">Wyjazd z domu:</label>
-          <input type="time" id="inputLeave" value="12:15" onchange="calcTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+          <input type="time" id="inputLeave" value="" onchange="calcTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
         </div>
         <div class="flex justify-between items-center">
           <label class="text-slate-400">Zbiórka:</label>
-          <input type="time" id="inputGath" value="13:30" onchange="calcTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+          <input type="time" id="inputGath" value="" onchange="calcTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
         </div>
         <div class="flex justify-between items-center">
           <label class="text-slate-400">Rozpoczęcie meczu:</label>
-          <input type="time" id="inputMatch" value="15:00" onchange="calcTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+          <input type="time" id="inputMatch" value="" onchange="calcTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
         </div>
       </div>
     </details>
@@ -205,7 +204,7 @@
       { id: 3, item: "Kluczyki + Telefon + Zegarek", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "all" },
       { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "match" },
       { id: 5, item: "Maść rozgrzewająca", pMatch: "Komora Boczna", pTrip: "Kosmetyczka", tag: "zimno", mode: "match" },
-      { id: 6, item: "Korki Lanki (FG)", pMatch: "Komora Głowna", pTrip: "Komora Główna", tag: "fg", mode: "match" },
+      { id: 6, item: "Korki Lanki (FG)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "fg", mode: "match" },
       { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "ag", mode: "match" },
       { id: 8, item: "Korki Wkręty / Mixy (SG)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "sg", mode: "match" },
       { id: 9, item: "Klapki pod prysznic", pMatch: "Komora Główna", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
@@ -337,9 +336,9 @@
       var iG = document.getElementById('inputGath');
       var iM = document.getElementById('inputMatch');
       var chkT = document.getElementById('chkTomorrow');
-      if(iL) iL.value = "12:15";
-      if(iG) iG.value = "13:30";
-      if(iM) iM.value = "15:00";
+      if(iL) iL.value = "";
+      if(iG) iG.value = "";
+      if(iM) iM.value = "";
       if(chkT) chkT.checked = false;
 
       checkedSet = {};
@@ -552,6 +551,36 @@
 
     function calcTimers() {
       var now = new Date();
+      
+      // 1. Aktualizacja zegara w stylu Apple (Lockscreen)
+      var timeStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+      var dateStr = now.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+      
+      var appleClockTimeEl = document.getElementById('appleClockTime');
+      var appleClockDateEl = document.getElementById('appleClockDate');
+      if(appleClockTimeEl) appleClockTimeEl.innerText = timeStr;
+      if(appleClockDateEl) appleClockDateEl.innerText = dateStr;
+
+      // 2. Sprawdzenie czy użytkownik podał choć jedną godzinę
+      var iL = document.getElementById('inputLeave');
+      var iG = document.getElementById('inputGath');
+      var iM = document.getElementById('inputMatch');
+      
+      var hasAnyTime = (iL && iL.value) || (iG && iG.value) || (iM && iM.value);
+      
+      var clockBox = document.getElementById('appleClockBox');
+      var timersBox = document.getElementById('matchTimersBox');
+
+      if (!hasAnyTime) {
+        if(clockBox) clockBox.classList.remove('hidden');
+        if(timersBox) timersBox.classList.add('hidden');
+        return;
+      } else {
+        if(clockBox) clockBox.classList.add('hidden');
+        if(timersBox) timersBox.classList.remove('hidden');
+      }
+
+      // 3. Obliczanie odliczania timerów
       var isTomorrow = document.getElementById('chkTomorrow') ? document.getElementById('chkTomorrow').checked : false;
 
       var arr = ['Leave', 'Gath', 'Match'];
@@ -561,7 +590,11 @@
         var displayEl = document.getElementById(type.toLowerCase() + 'Timer');
         if(!el || !displayEl) continue;
         var val = el.value;
-        if(!val) continue;
+        if(!val) {
+          displayEl.innerText = "--";
+          displayEl.className = "block text-lg font-bold text-slate-500";
+          continue;
+        }
         
         var p = val.split(':');
         var target = new Date();
@@ -591,17 +624,13 @@
 
         displayEl.innerText = txt;
 
-        // Logika kolorowania pod spóźnienia:
         if (isPast && !isTomorrow) {
           if (totalPastMinutes <= 5) {
-            // Do 5 min spóźnienia włącznie -> kolor ŻÓŁTY (amber)
             displayEl.className = "block text-lg font-bold text-amber-400";
           } else {
-            // Powyżej 5 min spóźnienia -> kolor CZERWONY
             displayEl.className = "block text-lg font-bold text-red-400";
           }
         } else {
-          // Standardowe kolory przed czasem
           if(type === 'Leave') displayEl.className = "block text-lg font-bold text-amber-400";
           if(type === 'Gath') displayEl.className = "block text-lg font-bold text-sky-400";
           if(type === 'Match') displayEl.className = "block text-lg font-bold text-emerald-400";
@@ -619,7 +648,7 @@
       populateWardrobeDropdown();
       drawChecklist();
       calcTimers();
-      setInterval(calcTimers, 10000);
+      setInterval(calcTimers, 1000);
     });
   </script>
 </body>
