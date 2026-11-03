@@ -38,15 +38,15 @@
       </div>
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">00h 00m</span>
+          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">0m</span>
           <span class="text-[10px] text-slate-400">Wyjazd</span>
         </div>
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="gathTimer" class="block text-lg font-bold text-sky-400">00h 00m</span>
+          <span id="gathTimer" class="block text-lg font-bold text-sky-400">0m</span>
           <span class="text-[10px] text-slate-400">Zbiórka</span>
         </div>
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="matchTimer" class="block text-lg font-bold text-emerald-400">00h 00m</span>
+          <span id="matchTimer" class="block text-lg font-bold text-emerald-400">0m</span>
           <span class="text-[10px] text-slate-400">Mecz</span>
         </div>
       </div>
@@ -192,7 +192,7 @@
       { id: 3, item: "Kluczyki + Telefon + Zegarek", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "all" },
       { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "match" },
       { id: 5, item: "Maść rozgrzewająca", pMatch: "Komora Boczna", pTrip: "Kosmetyczka", tag: "zimno", mode: "match" },
-      { id: 6, item: "Korki Lanki (FG)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "fg", mode: "match" },
+      { id: 6, item: "Korki Lanki (FG)", pMatch: "Komora Głowna", pTrip: "Komora Główna", tag: "fg", mode: "match" },
       { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "ag", mode: "match" },
       { id: 8, item: "Korki Wkręty / Mixy (SG)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "sg", mode: "match" },
       { id: 9, item: "Klapki pod prysznic", pMatch: "Komora Główna", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
@@ -562,17 +562,33 @@
         var isPast = diff < 0;
         var absDiff = Math.abs(diff);
 
+        var totalPastMinutes = isPast ? Math.floor(absDiff / 60000) : 0;
         var hrs = Math.floor(absDiff / (1000 * 3600));
         var mins = Math.floor((absDiff % (1000 * 3600)) / (1000 * 60));
         
         var formattedHrs = (hrs < 10 ? '0' + hrs : hrs);
         var formattedMins = (mins < 10 ? '0' + mins : mins);
 
-        if (isPast && !isTomorrow) {
-          displayEl.innerText = '-' + formattedHrs + 'h ' + formattedMins + 'm';
-          displayEl.className = "block text-lg font-bold text-red-400";
+        var txt = "";
+        if (hrs === 0) {
+          txt = (isPast && !isTomorrow ? '-' : '') + (mins < 10 ? '0' + mins : mins) + 'm';
         } else {
-          displayEl.innerText = formattedHrs + 'h ' + formattedMins + 'm';
+          txt = (isPast && !isTomorrow ? '-' : '') + formattedHrs + 'h ' + formattedMins + 'm';
+        }
+
+        displayEl.innerText = txt;
+
+        // Logika kolorowania pod spóźnienia:
+        if (isPast && !isTomorrow) {
+          if (totalPastMinutes <= 5) {
+            // Do 5 min spóźnienia włącznie -> kolor ŻÓŁTY (amber)
+            displayEl.className = "block text-lg font-bold text-amber-400";
+          } else {
+            // Powyżej 5 min spóźnienia -> kolor CZERWONY
+            displayEl.className = "block text-lg font-bold text-red-400";
+          }
+        } else {
+          // Standardowe kolory przed czasem
           if(type === 'Leave') displayEl.className = "block text-lg font-bold text-amber-400";
           if(type === 'Gath') displayEl.className = "block text-lg font-bold text-sky-400";
           if(type === 'Match') displayEl.className = "block text-lg font-bold text-emerald-400";
