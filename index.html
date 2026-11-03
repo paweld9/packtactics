@@ -16,9 +16,10 @@
   <style>
     body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    button { touch-action: manipulation; }
   </style>
 </head>
-<body class="pb-16 min-h-screen">
+<body class="pb-16 min-h-screen select-none">
   <!-- Header -->
   <header class="p-4 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-[#0b0f19]/90 backdrop-blur z-50">
     <div>
@@ -26,10 +27,10 @@
       <p class="text-[10px] text-slate-400 font-medium">Match & Trip Packing Hub</p>
     </div>
     <div class="flex gap-2">
-      <button onclick="toggleMode('match')" id="btn-mode-match" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+      <button id="btn-mode-match" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
         ⚽ Mecz
       </button>
-      <button onclick="toggleMode('trip')" id="btn-mode-trip" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+      <button id="btn-mode-trip" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
         🏕️ Wyjazd
       </button>
     </div>
@@ -45,184 +46,11 @@
       </div>
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">--:--</span>
+          <span id="leaveTimer" class="block text-lg font-bold text-amber-400">00h 00m</span>
           <span class="text-[10px] text-slate-400">Wyjazd</span>
         </div>
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="gathTimer" class="block text-lg font-bold text-sky-400">--:--</span>
+          <span id="gathTimer" class="block text-lg font-bold text-sky-400">00h 00m</span>
           <span class="text-[10px] text-slate-400">Zbiórka</span>
         </div>
-        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-          <span id="matchTimer" class="block text-lg font-bold text-emerald-400">--:--</span>
-          <span class="text-[10px] text-slate-400">Mecz</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Match Settings -->
-    <details id="timeSetupDetails" class="glass rounded-2xl p-4 cursor-pointer">
-      <summary class="text-sm font-semibold text-slate-200 flex justify-between items-center">
-        ⚙️ Ustawienia Godzinowe
-      </summary>
-      <div class="mt-3 space-y-3 pt-3 border-t border-slate-800 text-xs">
-        <div class="flex justify-between items-center">
-          <label class="text-slate-400">Wyjazd z domu:</label>
-          <input type="time" id="inputLeave" value="12:15" onchange="updateTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-        </div>
-        <div class="flex justify-between items-center">
-          <label class="text-slate-400">Zbiórka:</label>
-          <input type="time" id="inputGath" value="13:30" onchange="updateTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-        </div>
-        <div class="flex justify-between items-center">
-          <label class="text-slate-400">Rozpoczęcie meczu:</label>
-          <input type="time" id="inputMatch" value="15:00" onchange="updateTimers()" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
-        </div>
-      </div>
-    </details>
-
-    <!-- Trip Settings -->
-    <div id="tripSetupCard" class="glass rounded-2xl p-4 hidden">
-      <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Parametry Wyjazdu</h2>
-      <div class="flex justify-between items-center text-xs mb-3">
-        <label class="text-slate-300">Liczba dni wyjazdu:</label>
-        <div class="flex items-center gap-3">
-          <button type="button" onclick="changeDays(-1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">-</button>
-          <span id="daysCount" class="text-sm font-bold text-emerald-400">3</span>
-          <button type="button" onclick="changeDays(1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">+</button>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-2 text-xs mb-4">
-        <button type="button" onclick="toggleTag('plazawoda')" id="tag-plazawoda" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
-          🏖️ Plaża / Woda
-        </button>
-        <button type="button" onclick="toggleTag('wieczor')" id="tag-wieczor" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
-          🔥 Chłodne wieczory
-        </button>
-        <button type="button" onclick="toggleTag('gory')" id="tag-gory" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
-          🏔️ Góry
-        </button>
-        <button type="button" onclick="toggleTag('jafowy')" id="tag-jafowy" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
-          📖 Jafowy
-        </button>
-      </div>
-
-      <div class="pt-2 border-t border-slate-800/80 flex justify-center">
-        <button type="button" onclick="resetTripSettings()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">
-          Resetuj ustawienia
-        </button>
-      </div>
-    </div>
-
-    <!-- Match Tag Selectors -->
-    <div id="matchTagsCard" class="glass rounded-2xl p-4">
-      <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Warunki Meczowe</h2>
-      <div class="grid grid-cols-2 gap-2 text-xs mb-4">
-        <button type="button" onclick="toggleTag('zimno')" id="tag-zimno" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
-          ❄️ Zimno (<10°C)
-        </button>
-        <button type="button" onclick="toggleTag('deszcz')" id="tag-deszcz" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
-          🌧️ Deszcz / Mokro
-        </button>
-        <button type="button" onclick="toggleTag('ag')" id="tag-ag" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
-          🌱 Murawa Sztuczna
-        </button>
-        <button type="button" onclick="toggleTag('sg')" id="tag-sg" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
-          🌧️ Murawa Grząska
-        </button>
-      </div>
-
-      <div class="pt-2 border-t border-slate-800/80 flex justify-center">
-        <button type="button" onclick="resetMatchSettings()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">
-          Resetuj ustawienia
-        </button>
-      </div>
-    </div>
-
-    <!-- Add Custom Item Form -->
-    <details class="glass rounded-2xl p-4 cursor-pointer">
-      <summary class="text-sm font-semibold text-emerald-400 flex justify-between items-center">
-        ➕ Dodaj Własny Przedmiot do Szafy
-      </summary>
-      <div class="mt-3 space-y-3 pt-3 border-t border-slate-800 text-xs">
-        <input type="text" id="newItemName" placeholder="Nazwa przedmiotu (np. Klej do korków)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-        <select id="newItemPocket" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-          <option value="Plecak">Plecak</option>
-          <option value="Komora Boczna">Komora Boczna (Drobne)</option>
-          <option value="Komora Główna">Komora Główna (Sprzęt & Ubrania)</option>
-          <option value="Kosmetyczka">Kosmetyczka / Dolna Komora</option>
-          <option value="Pojemniki & Nawodnienie">Pojemniki & Nawodnienie</option>
-          <option value="Ubrania Wyjazdowe">Ubrania Wyjazdowe</option>
-          <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
-        </select>
-        <select id="newItemTag" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-          <option value="baza">Baza (Zawsze)</option>
-          <option value="zimno">Zimno (#zimno)</option>
-          <option value="deszcz">Deszcz (#deszcz)</option>
-          <option value="wyjazd_multi">Wyjazd (#wyjazd)</option>
-          <option value="gory">Góry (#gory)</option>
-          <option value="jafowy">Jafowy (#jafowy)</option>
-        </select>
-        <button type="button" onclick="addCustomItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy</button>
-      </div>
-    </details>
-
-    <!-- Packing Progress Bar -->
-    <div>
-      <div class="flex justify-between text-xs font-semibold mb-1">
-        <span class="text-slate-300">Postęp Pakowania</span>
-        <span id="progressPercent" class="text-emerald-400">0%</span>
-      </div>
-      <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-        <div id="progressBar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
-      </div>
-    </div>
-
-    <!-- Dynamic Checklist -->
-    <div id="checklistContainer" class="space-y-4"></div>
-  </main>
-
-  <script>
-    var currentMode = 'match';
-    var tripDays = 3;
-
-    var database = [
-      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pocketMatch: "Dolna Komora (Spód)", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
-      { id: 2, item: "Soczewki w etui + Krople do oczu", pocketMatch: "Komora Boczna", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
-      { id: 3, item: "Kluczyki + Telefon + Zegarek", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "all" },
-      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "match" },
-      { id: 5, item: "Maść rozgrzewająca", pocketMatch: "Komora Boczna", pocketTrip: "Kosmetyczka", tag: "zimno", mode: "match" },
-      { id: 6, item: "Korki Lanki (FG)", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "fg", mode: "match" },
-      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "ag", mode: "match" },
-      { id: 8, item: "Korki Wkręty / Mixy (SG)", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "sg", mode: "match" },
-      { id: 9, item: "Klapki pod prysznic", pocketMatch: "Komora Główna", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
-      { id: 10, item: "Getry + Ochraniacze + Spodenki", pocketMatch: "Komora Główna", pocketTrip: "Komora Główna", tag: "baza", mode: "match" },
-      { id: 11, item: "Bielizna termoaktywna + Komin", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "zimno", mode: "match" },
-      { id: 12, item: "Rękawiczki meczowe + Czapka", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "zimno", mode: "match" },
-      { id: 13, item: "Ortalion / Kurtka przeciwdeszczowa", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "deszcz_lub_zimno", mode: "match" },
-      { id: 14, item: "Zapasowa para getrów/skarpet", pocketMatch: "Komora Główna", pocketTrip: "Ubrania Wyjazdowe", tag: "deszcz", mode: "match" },
-      { id: 15, item: "Pojemniki z jedzeniem", pocketMatch: "Pojemniki & Nawodnienie", pocketTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
-      { id: 16, item: "Bidon z izotonikiem", pocketMatch: "Pojemniki & Nawodnienie", pocketTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
-      
-      // Wyjazdy
-      { id: 101, item: "Koszulki / T-shirty", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
-      { id: 102, item: "Bielizna + Skarpety", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
-      { id: 103, item: "Kąpielówki + Ręcznik plażowy", pocketMatch: "Akcesoria Wyjazdowe", pocketTrip: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
-      { id: 104, item: "Gruba bluza + Ciepłe dresy", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
-      { id: 105, item: "Ładowarka + Powerbank", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "trip" },
-      
-      // Góry & Plecak
-      { id: 106, item: "Buty trekkingowe / w góry", pocketMatch: "Komora Główna", pocketTrip: "Akcesoria Wyjazdowe", tag: "gory", mode: "trip" },
-      { id: 107, item: "Plecak trekkingowy / mały", pocketMatch: "Plecak", pocketTrip: "Plecak", tag: "gory", mode: "trip" },
-      
-      // Jafowy
-      { id: 108, item: "Biblia", pocketMatch: "Plecak", pocketTrip: "Plecak", tag: "jafowy", mode: "trip" },
-      { id: 109, item: "Zakreślacze + Długopis", pocketMatch: "Plecak", pocketTrip: "Plecak", tag: "jafowy", mode: "trip" },
-      { id: 110, item: "Notes / Zeszyt", pocketMatch: "Plecak", pocketTrip: "Plecak", tag: "jafowy", mode: "trip" }
-    ];
-
-    var activeTags = new Set(["baza", "fg"]);
-    var checkedItems = new Set();
-
-    function toggleMode(mode) {
-      currentMode = mode;
-      document.getElementById('btn-mode-match').className = mode === 'match' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-
+        <div
