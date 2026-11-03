@@ -134,7 +134,7 @@
             <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
           </select>
 
-          <!-- Dynamiczne pole wyboru przelicznika z płynnym okienkiem ułamkowym -->
+          <!-- Dynamiczne pole wyboru przelicznika z okienkiem ułamkowym -->
           <div id="ratioSetupArea" class="space-y-1">
             <label class="block text-[11px] text-slate-400">Przelicznik ilości na dni:</label>
             <div class="flex gap-2">
@@ -143,7 +143,7 @@
                 <option value="daily">1:1 (1 na każdy dzień)</option>
                 <option value="custom">Rotacja / Wskaźnik customowy</option>
               </select>
-              <input type="number" id="newItemCustomVal" value="2.5" step="0.1" min="0.1" placeholder="np. 2.5" class="w-20 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-2 text-white text-center font-bold hidden">
+              <input type="number" id="newItemCustomVal" value="2.5" step="0.1" min="0.1" placeholder="2.5" class="w-20 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-2 text-white text-center font-bold hidden">
             </div>
             <p id="ratioHint" class="text-[10px] text-slate-500 italic hidden pt-1">
               Wpisz wskaźnik (np. <b class="text-emerald-400">2.5</b> = 1 para co 2.5 dnia; <b class="text-emerald-400">0.8</b> = zliczanie koszulek).
@@ -205,6 +205,12 @@
       { id: 110, item: "Notes / Zeszyt", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" }
     ];
 
+    var db = [];
+    var customWardrobe = [];
+    var activeTripWardrobeIds = {};
+    var myTags = { "baza": true, "fg": true };
+    var checkedSet = {};
+
     function loadDb() {
       var saved = localStorage.getItem('packtactics_db');
       if(saved) {
@@ -213,12 +219,8 @@
       return defaultDb;
     }
 
-    var db = loadDb();
-    var customWardrobe = loadWardrobe();
-    var activeTripWardrobeIds = loadActiveTripWardrobe();
-
     function saveDb() { localStorage.setItem('packtactics_db', JSON.stringify(db)); }
-    
+
     function loadWardrobe() {
       var saved = localStorage.getItem('packtactics_wardrobe');
       return saved ? JSON.parse(saved) : [
@@ -227,31 +229,35 @@
         { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "custom", customVal: 2.5 }
       ];
     }
+
     function saveWardrobe() { localStorage.setItem('packtactics_wardrobe', JSON.stringify(customWardrobe)); }
 
     function loadActiveTripWardrobe() {
       var saved = localStorage.getItem('packtactics_active_wardrobe');
       return saved ? JSON.parse(saved) : {};
     }
+
     function saveActiveTripWardrobe() { localStorage.setItem('packtactics_active_wardrobe', JSON.stringify(activeTripWardrobeIds)); }
-
-    var myTags = {};
-    myTags["baza"] = true;
-    myTags["fg"] = true;
-
-    var checkedSet = {};
 
     function switchMode(m) {
       curMode = m;
-      document.getElementById('btn-mode-match').className = m === 'match' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
-      document.getElementById('btn-mode-trip').className = m === 'trip' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+      var bMatch = document.getElementById('btn-mode-match');
+      var bTrip = document.getElementById('btn-mode-trip');
+      
+      if(bMatch) bMatch.className = m === 'match' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+      if(bTrip) bTrip.className = m === 'trip' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
 
-      document.getElementById('countdownCard').style.display = m === 'match' ? 'block' : 'none';
-      document.getElementById('timeSetupDetails').style.display = m === 'match' ? 'block' : 'none';
-      document.getElementById('matchTagsCard').style.display = m === 'match' ? 'block' : 'none';
-      document.getElementById('tripSetupCard').style.display = m === 'trip' ? 'block' : 'none';
+      var cCard = document.getElementById('countdownCard');
+      var tDetails = document.getElementById('timeSetupDetails');
+      var mTags = document.getElementById('matchTagsCard');
+      var tSetup = document.getElementById('tripSetupCard');
+      var rArea = document.getElementById('ratioSetupArea');
 
-      document.getElementById('ratioSetupArea').style.display = m === 'trip' ? 'block' : 'none';
+      if(cCard) cCard.style.display = m === 'match' ? 'block' : 'none';
+      if(tDetails) tDetails.style.display = m === 'match' ? 'block' : 'none';
+      if(mTags) mTags.style.display = m === 'match' ? 'block' : 'none';
+      if(tSetup) tSetup.style.display = m === 'trip' ? 'block' : 'none';
+      if(rArea) rArea.style.display = m === 'trip' ? 'block' : 'none';
 
       populateWardrobeDropdown();
       drawChecklist();
@@ -295,7 +301,8 @@
 
     function adjustDays(d) {
       numDays = Math.max(1, numDays + d);
-      document.getElementById('daysCount').innerText = numDays;
+      var dCount = document.getElementById('daysCount');
+      if(dCount) dCount.innerText = numDays;
       drawChecklist();
     }
 
@@ -303,9 +310,12 @@
       delete myTags['zimno']; delete myTags['deszcz']; delete myTags['ag']; delete myTags['sg'];
       myTags['fg'] = true; myTags['baza'] = true;
 
-      document.getElementById('inputLeave').value = "12:15";
-      document.getElementById('inputGath').value = "13:30";
-      document.getElementById('inputMatch').value = "15:00";
+      var iL = document.getElementById('inputLeave');
+      var iG = document.getElementById('inputGath');
+      var iM = document.getElementById('inputMatch');
+      if(iL) iL.value = "12:15";
+      if(iG) iG.value = "13:30";
+      if(iM) iM.value = "15:00";
 
       checkedSet = {};
 
@@ -316,7 +326,8 @@
 
     function doResetTrip() {
       numDays = 3;
-      document.getElementById('daysCount').innerText = numDays;
+      var dCount = document.getElementById('daysCount');
+      if(dCount) dCount.innerText = numDays;
 
       delete myTags['plazawoda']; delete myTags['wieczor']; delete myTags['gory']; delete myTags['jafowy'];
 
@@ -327,23 +338,29 @@
     }
 
     function addNewWardrobeDefinition() {
-      var n = document.getElementById('newItemName').value;
-      var p = document.getElementById('newItemPocket').value;
-      var rule = document.getElementById('newItemRatioRule').value;
-      var customVal = parseFloat(document.getElementById('newItemCustomVal').value) || 1;
+      var nEl = document.getElementById('newItemName');
+      var pEl = document.getElementById('newItemPocket');
+      var rEl = document.getElementById('newItemRatioRule');
+      var vEl = document.getElementById('newItemCustomVal');
       
-      if(!n) return;
+      if(!nEl || !nEl.value) return;
+      
+      var n = nEl.value;
+      var p = pEl ? pEl.value : 'Plecak';
+      var rule = rEl ? rEl.value : 'fixed';
+      var customVal = vEl ? (parseFloat(vEl.value) || 1) : 1;
       
       var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, rule: rule, customVal: customVal };
       customWardrobe.push(itemObj);
       saveWardrobe();
       
-      document.getElementById('newItemName').value = '';
+      nEl.value = '';
       populateWardrobeDropdown();
     }
 
     function populateWardrobeDropdown() {
       var sel = document.getElementById('selectWardrobeItem');
+      if(!sel) return;
       sel.innerHTML = '<option value="">-- Wybierz przedmiot ze Szafy --</option>';
       
       var filtered = customWardrobe.filter(function(i) { return i.mode === curMode; });
@@ -357,6 +374,7 @@
       }
 
       var delBox = document.getElementById('wardrobeDeleteList');
+      if(!delBox) return;
       delBox.innerHTML = '';
       for(var j=0; j<filtered.length; j++) {
         var item = filtered[j];
@@ -370,6 +388,7 @@
 
     function addSelectedFromWardrobe() {
       var sel = document.getElementById('selectWardrobeItem');
+      if(!sel) return;
       var val = sel.value;
       if(!val) return;
 
@@ -423,6 +442,7 @@
 
     function drawChecklist() {
       var box = document.getElementById('checklistContainer');
+      if(!box) return;
       box.innerHTML = '';
 
       var list = [];
@@ -496,8 +516,10 @@
       }
 
       var pct = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
-      document.getElementById('progressPercent').innerText = pct + '%';
-      document.getElementById('progressBar'].style.width = pct + '%';
+      var pPct = document.getElementById('progressPercent');
+      var pBar = document.getElementById('progressBar');
+      if(pPct) pPct.innerText = pct + '%';
+      if(pBar) pBar.style.width = pct + '%';
     }
 
     function calcTimers() {
@@ -506,7 +528,8 @@
       for(var i=0; i<arr.length; i++) {
         var type = arr[i];
         var el = document.getElementById('input' + type);
-        if(!el) continue;
+        var displayEl = document.getElementById(type.toLowerCase() + 'Timer');
+        if(!el || !displayEl) continue;
         var val = el.value;
         if(!val) continue;
         var p = val.split(':');
@@ -520,17 +543,23 @@
         var mins = Math.floor((diff % (1000 * 3600)) / (1000 * 60));
         
         var txt = (hrs < 10 ? '0' + hrs : hrs) + 'h ' + (mins < 10 ? '0' + mins : mins) + 'm';
-        document.getElementById(type.toLowerCase() + 'Timer').innerText = txt;
+        displayEl.innerText = txt;
       }
     }
 
-    // Inicjalizacja bezbłędna
-    toggleCustomRatioInput();
-    refreshTagUI();
-    populateWardrobeDropdown();
-    drawChecklist();
-    calcTimers();
-    setInterval(calcTimers, 10000);
+    // Gwarancja prawidłowego uruchomienia po załadowaniu drzewa DOM
+    window.addEventListener('DOMContentLoaded', function() {
+      db = loadDb();
+      customWardrobe = loadWardrobe();
+      activeTripWardrobeIds = loadActiveTripWardrobe();
+
+      toggleCustomRatioInput();
+      refreshTagUI();
+      populateWardrobeDropdown();
+      drawChecklist();
+      calcTimers();
+      setInterval(calcTimers, 10000);
+    });
   </script>
 </body>
 </html>
