@@ -133,7 +133,7 @@
           <option value="gory">Góry (#gory)</option>
           <option value="jafowy">Jafowy (#jafowy)</option>
         </select>
-        <button type="button" onclick="addNewItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy</button>
+        <button type="button" onclick="addNewItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy na Stałe</button>
       </div>
     </details>
 
@@ -156,7 +156,7 @@
     var curMode = 'match';
     var numDays = 3;
 
-    var db = [
+    var defaultDb = [
       { id: 1, item: "Ręcznik + Żel + Antyperspirant", pMatch: "Dolna Komora (Spód)", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
       { id: 2, item: "Soczewki w etui + Krople do oczu", pMatch: "Komora Boczna", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
       { id: 3, item: "Kluczyki + Telefon + Zegarek", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "all" },
@@ -173,20 +173,32 @@
       { id: 14, item: "Zapasowa para getrów/skarpet", pMatch: "Komora Główna", pTrip: "Ubrania Wyjazdowe", tag: "deszcz", mode: "match" },
       { id: 15, item: "Pojemniki z jedzeniem", pMatch: "Pojemniki & Nawodnienie", pTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
       { id: 16, item: "Bidon z izotonikiem", pMatch: "Pojemniki & Nawodnienie", pTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
-      
       { id: 101, item: "Koszulki / T-shirty", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
       { id: 102, item: "Bielizna + Skarpety", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
       { id: 103, item: "Kąpielówki + Ręcznik plażowy", pMatch: "Akcesoria Wyjazdowe", pTrip: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
       { id: 104, item: "Gruba bluza + Ciepłe dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
       { id: 105, item: "Ładowarka + Powerbank", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "trip" },
-      
       { id: 106, item: "Buty trekkingowe / w góry", pMatch: "Komora Główna", pTrip: "Akcesoria Wyjazdowe", tag: "gory", mode: "trip" },
       { id: 107, item: "Plecak trekkingowy / mały", pMatch: "Plecak", pTrip: "Plecak", tag: "gory", mode: "trip" },
-      
       { id: 108, item: "Biblia", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" },
       { id: 109, item: "Zakreślacze + Długopis", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" },
       { id: 110, item: "Notes / Zeszyt", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" }
     ];
+
+    // Wczytywanie z LocalStorage
+    var db = loadDb();
+
+    function loadDb() {
+      var saved = localStorage.getItem('packtactics_db');
+      if(saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      return defaultDb;
+    }
+
+    function saveDb() {
+      localStorage.setItem('packtactics_db', JSON.stringify(db));
+    }
 
     var myTags = {};
     myTags["baza"] = true;
@@ -266,7 +278,10 @@
       var p = document.getElementById('newItemPocket').value;
       var t = document.getElementById('newItemTag').value;
       if(!n) return;
+      
       db.push({ id: Date.now(), item: n, pMatch: p, pTrip: p, tag: t, mode: 'all' });
+      saveDb(); // Trwały zapis w pamięci telefonu
+      
       document.getElementById('newItemName').value = '';
       drawChecklist();
     }
