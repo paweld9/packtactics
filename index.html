@@ -134,19 +134,19 @@
             <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
           </select>
 
-          <!-- Dynamiczne pole wyboru przelicznika z okienkiem ułamkowym -->
+          <!-- Wybór przelicznika na 1 dzień wyjazdu -->
           <div id="ratioSetupArea" class="space-y-1">
-            <label class="block text-[11px] text-slate-400">Przelicznik ilości na dni:</label>
+            <label class="block text-[11px] text-slate-400">Dzienny wskaźnik zużycia (sztuk na 1 dzień):</label>
             <div class="flex gap-2">
               <select id="newItemRatioRule" onchange="toggleCustomRatioInput()" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
-                <option value="fixed">Stała ilość (Zawsze 1 szt.)</option>
-                <option value="daily">1:1 (1 na każdy dzień)</option>
-                <option value="custom">Rotacja / Wskaźnik customowy</option>
+                <option value="fixed">Stała ilość (Niezależna od dni, zawsze 1 szt.)</option>
+                <option value="daily">1.0 / dzień (Bielizna, skarpety - 1 szt./dzień)</option>
+                <option value="custom">Customowy wskaźnik dzienny (np. 0.4 dla spodni)</option>
               </select>
-              <input type="number" id="newItemCustomVal" value="2.5" step="0.1" min="0.1" placeholder="2.5" class="w-20 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-2 text-white text-center font-bold hidden">
+              <input type="number" id="newItemCustomVal" value="0.4" step="0.1" min="0.1" max="5.0" placeholder="0.4" class="w-20 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-2 text-white text-center font-bold hidden">
             </div>
             <p id="ratioHint" class="text-[10px] text-slate-500 italic hidden pt-1">
-              Wpisz wskaźnik (np. <b class="text-emerald-400">2.5</b> = 1 para co 2.5 dnia; <b class="text-emerald-400">0.8</b> = zliczanie koszulek).
+              Wpisz ile sztuk/par przypada na 1 dzień (np. <b class="text-emerald-400">0.4</b> = 1 para na 2.5 dnia, <b class="text-emerald-400">0.8</b> = 4 koszulki na 5 dni).
             </p>
           </div>
 
@@ -224,9 +224,9 @@
     function loadWardrobe() {
       var saved = localStorage.getItem('packtactics_wardrobe');
       return saved ? JSON.parse(saved) : [
-        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 1 },
-        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 1 },
-        { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "custom", customVal: 2.5 }
+        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 0 },
+        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 0 },
+        { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "custom", customVal: 0.4 }
       ];
     }
 
@@ -348,7 +348,10 @@
       var n = nEl.value;
       var p = pEl ? pEl.value : 'Plecak';
       var rule = rEl ? rEl.value : 'fixed';
-      var customVal = vEl ? (parseFloat(vEl.value) || 1) : 1;
+      var customVal = 0;
+      
+      if(rule === 'daily') customVal = 1.0;
+      else if(rule === 'custom') customVal = vEl ? (parseFloat(vEl.value) || 0.4) : 0.4;
       
       var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, rule: rule, customVal: customVal };
       customWardrobe.push(itemObj);
@@ -380,7 +383,7 @@
         var item = filtered[j];
         var div = document.createElement('div');
         div.className = "flex justify-between items-center text-[11px] text-slate-400 py-0.5";
-        var ruleTxt = (item.rule === 'custom') ? ' [wskaźnik: ' + item.customVal + ']' : (item.rule === 'daily' ? ' [1:1]' : '');
+        var ruleTxt = (item.rule === 'custom' || item.rule === 'daily') ? ' [' + item.customVal + '/dzień]' : '';
         div.innerHTML = '<span>' + item.item + ruleTxt + '</span><button type="button" onclick="permanentlyDeleteWardrobeItem(' + item.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
         delBox.appendChild(div);
       }
@@ -428,13 +431,14 @@
       drawChecklist();
     }
 
+    // Wyliczanie liczby sztuk na żywo: Math.round(dni * wskaźnik_dzienny)
     function computeQuantity(item) {
       if(curMode !== 'trip') return null;
       if(item.tag === 'wyjazd_multi') return numDays;
 
       if(item.rule === 'daily') return numDays;
       if(item.rule === 'custom' && item.customVal > 0) {
-        return Math.max(1, Math.round(numDays / item.customVal));
+        return Math.max(1, Math.round(numDays * item.customVal));
       }
       
       return null;
@@ -547,7 +551,6 @@
       }
     }
 
-    // Gwarancja prawidłowego uruchomienia po załadowaniu drzewa DOM
     window.addEventListener('DOMContentLoaded', function() {
       db = loadDb();
       customWardrobe = loadWardrobe();
