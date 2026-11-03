@@ -109,7 +109,7 @@
       </div>
     </div>
 
-    <!-- Dodawanie z Szafy via Dropdown / Select -->
+    <!-- Dodawanie z Szafy via Dropdown -->
     <div class="glass rounded-2xl p-4 space-y-3">
       <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">Dodaj przedmiot z Twojej Szafy</h2>
       <div class="flex gap-2 text-xs">
@@ -119,11 +119,11 @@
         <button type="button" onclick="addSelectedFromWardrobe()" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl hover:bg-emerald-400 transition">➕ Dodaj</button>
       </div>
 
-      <!-- Rozwijana sekcja zarządzania Szafą (dodawanie nowych definicji) -->
+      <!-- Rozwijana sekcja zarządzania Szafą -->
       <details class="text-xs pt-1">
         <summary class="text-slate-400 cursor-pointer hover:text-slate-200">⚙️ Zarządzaj bazą Szafy (Dodaj nowy przedmiot na stałe)</summary>
         <div class="mt-3 space-y-3 p-3 bg-slate-900/80 rounded-xl border border-slate-800">
-          <input type="text" id="newItemName" placeholder="Nazwa nowego sprzętu (np. Spodnie, Piżama)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          <input type="text" id="newItemName" placeholder="Nazwa nowego sprzętu (np. Spodnie, Koszulki)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
           <select id="newItemPocket" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
             <option value="Plecak">Plecak</option>
             <option value="Komora Boczna">Komora Boczna (Drobne)</option>
@@ -134,11 +134,16 @@
             <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
           </select>
 
-          <!-- Opcja wyboru mnożenia przez dni -->
-          <label id="multiDayOptionLabel" class="flex items-center gap-2 cursor-pointer pt-1 text-slate-300">
-            <input type="checkbox" id="newItemIsMulti" class="w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-950">
-            <span>Mnóż ilość przez liczbę dni wyjazdu (np. spodnie, skarpetki)</span>
-          </label>
+          <!-- Wybór reguły ilościowej -->
+          <div id="ratioSetupArea">
+            <label class="block text-[11px] text-slate-400 mb-1">Przelicznik ilości na dni:</label>
+            <select id="newItemRatioRule" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <option value="fixed">Stała ilość (Zawsze 1 szt.)</option>
+              <option value="daily">1 sztuka na każdy dzień (1:1)</option>
+              <option value="rot2">Rotacja: 1 sztuka co 2.5 dnia (np. spodnie / dresy)</option>
+              <option value="shirts">Koszule/Koszulki (wskaźnik 0.8 / dzień)</option>
+            </select>
+          </div>
 
           <button type="button" onclick="addNewWardrobeDefinition()" class="w-full py-2 bg-slate-800 border border-slate-700 text-emerald-400 font-semibold rounded-lg hover:bg-slate-700">Zapisz nowy przedmiot w Szafie</button>
           
@@ -212,8 +217,9 @@
     function loadWardrobe() {
       var saved = localStorage.getItem('packtactics_wardrobe');
       return saved ? JSON.parse(saved) : [
-        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", isMulti: false },
-        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", isMulti: false }
+        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed" },
+        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed" },
+        { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "rot2" }
       ];
     }
     function saveWardrobe() { localStorage.setItem('packtactics_wardrobe', JSON.stringify(customWardrobe)); }
@@ -240,7 +246,7 @@
       document.getElementById('matchTagsCard').style.display = m === 'match' ? 'block' : 'none';
       document.getElementById('tripSetupCard').style.display = m === 'trip' ? 'block' : 'none';
 
-      document.getElementById('multiDayOptionLabel').style.display = m === 'trip' ? 'flex' : 'none';
+      document.getElementById('ratioSetupArea').style.display = m === 'trip' ? 'block' : 'none';
 
       populateWardrobeDropdown();
       drawChecklist();
@@ -304,15 +310,14 @@
     function addNewWardrobeDefinition() {
       var n = document.getElementById('newItemName').value;
       var p = document.getElementById('newItemPocket').value;
-      var isMulti = document.getElementById('newItemIsMulti').checked;
+      var rule = document.getElementById('newItemRatioRule').value;
       if(!n) return;
       
-      var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, isMulti: isMulti };
+      var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, rule: rule };
       customWardrobe.push(itemObj);
       saveWardrobe();
       
       document.getElementById('newItemName').value = '';
-      document.getElementById('newItemIsMulti').checked = false;
       populateWardrobeDropdown();
     }
 
@@ -338,8 +343,7 @@
         var item = filtered[j];
         var div = document.createElement('div');
         div.className = "flex justify-between items-center text-[11px] text-slate-400 py-0.5";
-        var tagMultiTxt = (item.isMulti && curMode === 'trip') ? ' [x Dni]' : '';
-        div.innerHTML = '<span>' + item.item + tagMultiTxt + '</span><button type="button" onclick="permanentlyDeleteWardrobeItem(' + item.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
+        div.innerHTML = '<span>' + item.item + '</span><button type="button" onclick="permanentlyDeleteWardrobeItem(' + item.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
         delBox.appendChild(div);
       }
     }
@@ -386,6 +390,21 @@
       if(checkedSet[id]) delete checkedSet[id];
       else checkedSet[id] = true;
       drawChecklist();
+    }
+
+    // Obliczanie ilości przedmiotów na podstawie wybranej reguły ułamkowej/skalowej
+    function computeQuantity(item) {
+      if(curMode !== 'trip') return null;
+      
+      // Standardowe przedmioty wielokrotne
+      if(item.tag === 'wyjazd_multi') return numDays;
+
+      // Przedmioty ze Szafy wg reguł
+      if(item.rule === 'daily') return numDays;
+      if(item.rule === 'rot2') return Math.ceil(numDays / 2.5); // np. 5 dni / 2.5 = 2 pary; 7 dni / 2.5 = 2.8 -> 3 pary
+      if(item.rule === 'shirts') return Math.round(numDays * 0.8); // np. 5 dni -> 4 koszulki; 7 dni -> 6 koszulek
+      
+      return null; // dla 'fixed' oraz zwykłych sztuk
     }
 
     function drawChecklist() {
@@ -442,10 +461,9 @@
           if(isC) checkedCount++;
           
           var lbl = o.item;
-          if(curMode === 'trip') {
-            if(o.tag === 'wyjazd_multi' || o.isMulti) {
-              lbl = o.item + ' (' + numDays + ' szt.)';
-            }
+          var qty = computeQuantity(o);
+          if(qty !== null && qty > 1) {
+            lbl = o.item + ' (' + qty + ' szt.)';
           }
 
           var deleteBtnHtml = (o.tag === "szafa_custom") ?
