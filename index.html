@@ -109,31 +109,35 @@
       </div>
     </div>
 
-    <!-- Add Custom Item Form -->
+    <!-- Moja Szafa (Zarządzaj Sprzętem) -->
     <details class="glass rounded-2xl p-4 cursor-pointer">
       <summary class="text-sm font-semibold text-emerald-400 flex justify-between items-center">
-        ➕ Dodaj Własny Przedmiot do Szafy
+        👕 Moja Szafa (Wybierz co chcesz spakować)
       </summary>
-      <div class="mt-3 space-y-3 pt-3 border-t border-slate-800 text-xs">
-        <input type="text" id="newItemName" placeholder="Nazwa przedmiotu (np. iPad, klej)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-        <select id="newItemPocket" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-          <option value="Plecak">Plecak</option>
-          <option value="Komora Boczna">Komora Boczna (Drobne)</option>
-          <option value="Komora Główna">Komora Główna (Sprzęt & Ubrania)</option>
-          <option value="Kosmetyczka">Kosmetyczka / Dolna Komora</option>
-          <option value="Pojemniki & Nawodnienie">Pojemniki & Nawodnienie</option>
-          <option value="Ubrania Wyjazdowe">Ubrania Wyjazdowe</option>
-          <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
-        </select>
-        <select id="newItemTag" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-          <option value="baza">Baza (Zawsze w tym trybie)</option>
-          <option value="zimno">Zimno (#zimno)</option>
-          <option value="deszcz">Deszcz (#deszcz)</option>
-          <option value="wyjazd_multi">Wyjazd zliczany (#dni)</option>
-          <option value="gory">Góry (#gory)</option>
-          <option value="jafowy">Jafowy (#jafowy)</option>
-        </select>
-        <button type="button" onclick="addNewItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy na Stałe</button>
+      <div class="mt-3 space-y-4 pt-3 border-t border-slate-800 text-xs">
+        
+        <!-- Formularz dodawania nowej pozycji do Szafy -->
+        <div class="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+          <span class="block text-[11px] text-slate-400 font-semibold">Dodaj nowy przedmiot na stałe do Szafy:</span>
+          <input type="text" id="newItemName" placeholder="Nazwa przedmiotu (np. iPad, MacBook)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+          <select id="newItemPocket" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+            <option value="Plecak">Plecak</option>
+            <option value="Komora Boczna">Komora Boczna (Drobne)</option>
+            <option value="Komora Główna">Komora Główna (Sprzęt & Ubrania)</option>
+            <option value="Kosmetyczka">Kosmetyczka / Dolna Komora</option>
+            <option value="Pojemniki & Nawodnienie">Pojemniki & Nawodnienie</option>
+            <option value="Ubrania Wyjazdowe">Ubrania Wyjazdowe</option>
+            <option value="Akcesoria Wyjazdowe">Akcesoria Wyjazdowe</option>
+          </select>
+          <button type="button" onclick="addCustomToWardrobe()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Zapisz w Szafie</button>
+        </div>
+
+        <!-- Lista przedmiotów w Szafie z możliwością włączania do pakowania -->
+        <div>
+          <span class="block text-[11px] text-slate-400 font-semibold mb-2">Wybierz przedmioty do spakowania na ten wyjazd:</span>
+          <div id="wardrobeList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+        </div>
+
       </div>
     </details>
 
@@ -194,10 +198,22 @@
     }
 
     var db = loadDb();
+    var customWardrobe = loadWardrobe();
+    var selectedWardrobeIds = loadSelectedWardrobe();
 
-    function saveDb() {
-      localStorage.setItem('packtactics_db', JSON.stringify(db));
+    function saveDb() { localStorage.setItem('packtactics_db', JSON.stringify(db)); }
+    
+    function loadWardrobe() {
+      var saved = localStorage.getItem('packtactics_wardrobe');
+      return saved ? JSON.parse(saved) : [];
     }
+    function saveWardrobe() { localStorage.setItem('packtactics_wardrobe', JSON.stringify(customWardrobe)); }
+
+    function loadSelectedWardrobe() {
+      var saved = localStorage.getItem('packtactics_selected_wardrobe');
+      return saved ? JSON.parse(saved) : {};
+    }
+    function saveSelectedWardrobe() { localStorage.setItem('packtactics_selected_wardrobe', JSON.stringify(selectedWardrobeIds)); }
 
     var myTags = {};
     myTags["baza"] = true;
@@ -215,6 +231,7 @@
       document.getElementById('matchTagsCard').style.display = m === 'match' ? 'block' : 'none';
       document.getElementById('tripSetupCard').style.display = m === 'trip' ? 'block' : 'none';
 
+      drawWardrobeUI();
       drawChecklist();
     }
 
@@ -272,24 +289,80 @@
       drawChecklist();
     }
 
-    function addNewItem() {
+    function addCustomToWardrobe() {
       var n = document.getElementById('newItemName').value;
       var p = document.getElementById('newItemPocket').value;
-      var t = document.getElementById('newItemTag').value;
       if(!n) return;
       
-      db.push({ id: Date.now(), item: n, pMatch: p, pTrip: p, tag: t, mode: curMode });
-      saveDb();
+      var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode };
+      customWardrobe.push(itemObj);
+      saveWardrobe();
       
       document.getElementById('newItemName').value = '';
+      drawWardrobeUI();
       drawChecklist();
     }
 
-    function deleteItem(id) {
+    function toggleWardrobeSelection(id) {
+      if(selectedWardrobeIds[id]) delete selectedWardrobeIds[id];
+      else selectedWardrobeIds[id] = true;
+      saveSelectedWardrobe();
+      drawChecklist();
+    }
+
+    // Usuwanie przedmiotu całkowicie ze Szafy
+    function deleteWardrobeItem(id) {
+      customWardrobe = customWardrobe.filter(function(i) { return i.id !== id; });
+      delete selectedWardrobeIds[id];
+      delete checkedSet[id];
+      saveWardrobe();
+      saveSelectedWardrobe();
+      drawWardrobeUI();
+      drawChecklist();
+    }
+
+    // Odznaczenie przedmiotu z checklisty (krzyżyk na głównej liście)
+    function removeFromChecklist(id) {
+      delete selectedWardrobeIds[id];
+      delete checkedSet[id];
+      saveSelectedWardrobe();
+      drawWardrobeUI();
+      drawChecklist();
+    }
+
+    function deleteBuiltinItem(id) {
       db = db.filter(function(i) { return i.id !== id; });
       delete checkedSet[id];
       saveDb();
       drawChecklist();
+    }
+
+    function drawWardrobeUI() {
+      var box = document.getElementById('wardrobeList');
+      box.innerHTML = '';
+      
+      var filteredWardrobe = customWardrobe.filter(function(i) { return i.mode === curMode; });
+
+      if(filteredWardrobe.length === 0) {
+        box.innerHTML = '<span class="text-[11px] text-slate-500 italic block py-1">Brak zapisanych własnych przedmiotów dla tej zakładki.</span>';
+        return;
+      }
+
+      for(var i=0; i<filteredWardrobe.length; i++) {
+        var o = filteredWardrobe[i];
+        var isSel = !!selectedWardrobeIds[o.id];
+        
+        var div = document.createElement('div');
+        div.className = "flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 text-xs";
+        div.innerHTML = 
+          '<label class="flex items-center gap-2 cursor-pointer flex-1 mr-2">' +
+            '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' onchange="toggleWardrobeSelection(' + o.id + ')" class="w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-950">' +
+            '<span class="text-slate-200 font-medium">' + o.item + ' <span class="text-[10px] text-slate-500">(' + (curMode === 'trip' ? o.pTrip : o.pMatch) + ')</span></span>' +
+          '</label>' +
+          '<button type="button" onclick="deleteWardrobeItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 font-bold px-1.5 py-0.5" title="Usuń na stałe ze Szafy">✕</button>';
+        
+        box.appendChild(div);
+      }
     }
 
     function toggleBox(id) {
@@ -303,6 +376,8 @@
       box.innerHTML = '';
 
       var list = [];
+      
+      // 1. Przedmioty wbudowane
       for(var i=0; i<db.length; i++) {
         var it = db[i];
         if(it.mode !== 'all' && it.mode !== curMode) continue;
@@ -313,6 +388,14 @@
         }
         if(myTags[it.tag] || (curMode === 'trip' && it.tag === 'wyjazd_multi')) {
           list.push(it);
+        }
+      }
+
+      // 2. Przedmioty z Szafy wybrane przez użytkownika
+      for(var c=0; c<customWardrobe.length; c++) {
+        var cItem = customWardrobe[c];
+        if(cItem.mode === curMode && selectedWardrobeIds[cItem.id]) {
+          list.push(cItem);
         }
       }
 
@@ -346,12 +429,17 @@
             lbl = o.item + ' (' + numDays + ' szt.)';
           }
 
+          // Różne akcje usuwania: dla rzeczy z Szafy schodzą tylko z checklisty, a wbudowane usuwają się z bazy
+          var deleteBtnHtml = (o.tag === "szafa_custom") ?
+            '<button type="button" onclick="removeFromChecklist(' + o.id + ')" class="text-slate-500 hover:text-amber-400 text-xs px-2 py-1 transition font-bold" title="Ukryj na tej liście">✕</button>' :
+            '<button type="button" onclick="deleteBuiltinItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń z bazy">✕</button>';
+
           html += '<div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition">' +
             '<label class="flex items-start gap-3 cursor-pointer flex-1 mr-2">' +
             '<input type="checkbox" ' + (isC ? 'checked' : '') + ' onchange="toggleBox(' + o.id + ')" class="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900">' +
             '<div><span class="text-sm block ' + (isC ? 'line-through text-slate-500' : 'text-slate-200') + '">' + lbl + '</span></div>' +
             '</label>' +
-            '<button type="button" onclick="deleteItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń przedmiot">✕</button>' +
+            deleteBtnHtml +
             '</div>';
         }
 
@@ -390,6 +478,7 @@
     }
 
     refreshTagUI();
+    drawWardrobeUI();
     drawChecklist();
     calcTimers();
     setInterval(calcTimers, 10000);
