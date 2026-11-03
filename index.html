@@ -86,22 +86,22 @@
       <div class="flex justify-between items-center text-xs mb-3">
         <label class="text-slate-300">Liczba dni wyjazdu:</label>
         <div class="flex items-center gap-3">
-          <button onclick="changeDays(-1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">-</button>
+          <button type="button" onclick="changeDays(-1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">-</button>
           <span id="daysCount" class="text-sm font-bold text-emerald-400">3</span>
-          <button onclick="changeDays(1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">+</button>
+          <button type="button" onclick="changeDays(1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">+</button>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs">
-        <button onclick="toggleTag('plazawoda')" id="tag-plazawoda" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('plazawoda')" id="tag-plazawoda" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
           🏖️ Plaża / Woda
         </button>
-        <button onclick="toggleTag('wieczor')" id="tag-wieczor" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('wieczor')" id="tag-wieczor" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
           🔥 Chłodne wieczory
         </button>
-        <button onclick="toggleTag('gory')" id="tag-gory" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('gory')" id="tag-gory" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
           🏔️ Góry
         </button>
-        <button onclick="toggleTag('jafowy')" id="tag-jafowy" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('jafowy')" id="tag-jafowy" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
           📖 Jafowy
         </button>
       </div>
@@ -111,16 +111,16 @@
     <div id="matchTagsCard" class="glass rounded-2xl p-4">
       <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Warunki Meczowe</h2>
       <div class="grid grid-cols-2 gap-2 text-xs">
-        <button onclick="toggleTag('zimno')" id="tag-zimno" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('zimno')" id="tag-zimno" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
           ❄️ Zimno (<10°C)
         </button>
-        <button onclick="toggleTag('deszcz')" id="tag-deszcz" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('deszcz')" id="tag-deszcz" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
           🌧️ Deszcz / Mokro
         </button>
-        <button onclick="toggleTag('ag')" id="tag-ag" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('ag')" id="tag-ag" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
           🌱 Murawa Sztuczna
         </button>
-        <button onclick="toggleTag('sg')" id="tag-sg" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
+        <button type="button" onclick="toggleTag('sg')" id="tag-sg" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
           🌧️ Murawa Grząska
         </button>
       </div>
@@ -149,7 +149,7 @@
           <option value="gory">Góry (#gory)</option>
           <option value="jafowy">Jafowy (#jafowy)</option>
         </select>
-        <button onclick="addCustomItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy</button>
+        <button type="button" onclick="addCustomItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy</button>
       </div>
     </details>
 
@@ -169,10 +169,10 @@
   </main>
 
   <script>
-    let currentMode = 'match';
-    let tripDays = 3;
+    var currentMode = 'match';
+    var tripDays = 3;
 
-    let database = [
+    var database = [
       { id: 1, item: "Ręcznik + Żel + Antyperspirant", pocketMatch: "Dolna Komora (Spód)", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
       { id: 2, item: "Soczewki w etui + Krople do oczu", pocketMatch: "Komora Boczna", pocketTrip: "Kosmetyczka", tag: "baza", mode: "all" },
       { id: 3, item: "Kluczyki + Telefon + Zegarek", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "all" },
@@ -194,4 +194,161 @@
       { id: 101, item: "Koszulki / T-shirty", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
       { id: 102, item: "Bielizna + Skarpety", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
       { id: 103, item: "Kąpielówki + Ręcznik plażowy", pocketMatch: "Akcesoria Wyjazdowe", pocketTrip: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
-      { id: 104, item: "Gruba bluza + Ciepłe dresy", pocketMatch: "U
+      { id: 104, item: "Gruba bluza + Ciepłe dresy", pocketMatch: "Ubrania Wyjazdowe", pocketTrip: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
+      { id: 105, item: "Ładowarka + Powerbank", pocketMatch: "Komora Boczna", pocketTrip: "Komora Boczna", tag: "baza", mode: "trip" },
+      
+      // Góry
+      { id: 106, item: "Buty trekkingowe / w góry", pocketMatch: "Komora Główna", pocketTrip: "Akcesoria Wyjazdowe", tag: "gory", mode: "trip" },
+      { id: 107, item: "Plecak trekkingowy / mały", pocketMatch: "Komora Główna", pocketTrip: "Akcesoria Wyjazdowe", tag: "gory", mode: "trip" },
+      
+      // Jafowy
+      { id: 108, item: "Biblia", pocketMatch: "Komora Boczna", pocketTrip: "Akcesoria Wyjazdowe", tag: "jafowy", mode: "trip" },
+      { id: 109, item: "Zakreślacze + Długopis", pocketMatch: "Komora Boczna", pocketTrip: "Akcesoria Wyjazdowe", tag: "jafowy", mode: "trip" },
+      { id: 110, item: "Notes / Zeszyt", pocketMatch: "Komora Boczna", pocketTrip: "Akcesoria Wyjazdowe", tag: "jafowy", mode: "trip" }
+    ];
+
+    var activeTags = new Set(["baza", "fg"]);
+    var checkedItems = new Set();
+
+    function toggleMode(mode) {
+      currentMode = mode;
+      document.getElementById('btn-mode-match').className = mode === 'match' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+      document.getElementById('btn-mode-trip').className = mode === 'trip' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+
+      document.getElementById('countdownCard').style.display = mode === 'match' ? 'block' : 'none';
+      document.getElementById('timeSetupDetails').style.display = mode === 'match' ? 'block' : 'none';
+      document.getElementById('matchTagsCard').style.display = mode === 'match' ? 'block' : 'none';
+      document.getElementById('tripSetupCard').style.display = mode === 'trip' ? 'block' : 'none';
+
+      renderChecklist();
+    }
+
+    function changeDays(delta) {
+      tripDays = Math.max(1, tripDays + delta);
+      document.getElementById('daysCount').innerText = tripDays;
+      renderChecklist();
+    }
+
+    function toggleTag(tag) {
+      if(tag === 'ag' || tag === 'sg') { activeTags.delete('fg'); activeTags.delete('ag'); activeTags.delete('sg'); }
+      if(activeTags.has(tag)) activeTags.delete(tag);
+      else activeTags.add(tag);
+      if(!activeTags.has('ag') && !activeTags.has('sg')) activeTags.add('fg');
+      
+      updateTagUI();
+      renderChecklist();
+    }
+
+    function updateTagUI() {
+      ['zimno', 'deszcz', 'ag', 'sg', 'plazawoda', 'wieczor', 'gory', 'jafowy'].forEach(function(t) {
+        var btn = document.getElementById('tag-' + t);
+        if(btn) {
+          if(activeTags.has(t)) btn.className = "p-2.5 rounded-xl border text-left bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold";
+          else btn.className = "p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400";
+        }
+      });
+    }
+
+    function addCustomItem() {
+      var name = document.getElementById('newItemName').value;
+      var pocket = document.getElementById('newItemPocket').value;
+      var tag = document.getElementById('newItemTag').value;
+
+      if(!name) return;
+
+      var newItem = { id: Date.now(), item: name, pocketMatch: pocket, pocketTrip: pocket, tag: tag, mode: 'all' };
+      database.push(newItem);
+      document.getElementById('newItemName').value = '';
+      renderChecklist();
+    }
+
+    function renderChecklist() {
+      var container = document.getElementById('checklistContainer');
+      container.innerHTML = '';
+
+      var filtered = database.filter(function(i) {
+        if (i.mode !== 'all' && i.mode !== currentMode) return false;
+        if (i.tag === 'baza') return true;
+        if (i.tag === 'deszcz_lub_zimno') return activeTags.has('deszcz') || activeTags.has('zimno');
+        return activeTags.has(i.tag) || (currentMode === 'trip' && i.tag === 'wyjazd_multi');
+      });
+
+      var grouped = {};
+      filtered.forEach(function(item) {
+        var pocketKey = currentMode === 'trip' ? item.pocketTrip : item.pocketMatch;
+        if(!grouped[pocketKey]) grouped[pocketKey] = [];
+        grouped[pocketKey].push(item);
+      });
+
+      var total = filtered.length;
+      var checkedCount = 0;
+
+      Object.keys(grouped).forEach(function(pocket) {
+        var section = document.createElement('div');
+        section.className = 'glass rounded-2xl p-4';
+        
+        var html = '<h3 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">' + pocket + '</h3><div class="space-y-2">';
+        
+        grouped[pocket].forEach(function(i) {
+          var isChecked = checkedItems.has(i.id);
+          if(isChecked) checkedCount++;
+          
+          var displayLabel = i.item;
+          if(currentMode === 'trip' && i.tag === 'wyjazd_multi') {
+            displayLabel = i.item + ' (' + tripDays + ' szt.)';
+          }
+
+          html += `
+            <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/50 cursor-pointer transition">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${i.id})" class="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900">
+              <div>
+                <span class="text-sm block ${isChecked ? 'line-through text-slate-500' : 'text-slate-200'}">${displayLabel}</span>
+              </div>
+            </label>
+          `;
+        });
+
+        html += '</div>';
+        section.innerHTML = html;
+        container.appendChild(section);
+      });
+
+      var pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+      document.getElementById('progressPercent').innerText = pct + '%';
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function toggleCheck(id) {
+      if(checkedItems.has(id)) checkedItems.delete(id);
+      else checkedItems.add(id);
+      renderChecklist();
+    }
+
+    function updateTimers() {
+      var now = new Date();
+      ['Leave', 'Gath', 'Match'].forEach(function(type) {
+        var el = document.getElementById('input' + type);
+        if(!el) return;
+        var val = el.value;
+        if(!val) return;
+        var parts = val.split(':');
+        var target = new Date();
+        target.setHours(parseInt(parts[0]), parseInt(parts[1]), 0);
+        
+        var diff = target - now;
+        if(diff < 0) diff += 24 * 3600 * 1000;
+        
+        var hrs = Math.floor(diff / (1000 * 3600));
+        var mins = Math.floor((diff % (1000 * 3600)) / (1000 * 60));
+        
+        document.getElementById(type.toLowerCase() + 'Timer').innerText = hrs + 'h ' + mins + 'm';
+      });
+    }
+
+    updateTagUI();
+    renderChecklist();
+    updateTimers();
+    setInterval(updateTimers, 30000);
+  </script>
+</body>
+</html>
