@@ -10,30 +10,39 @@
     &quot;short_name&quot;: &quot;PackTactics&quot;,
     &quot;start_url&quot;: &quot;.&quot;,
     &quot;display&quot;: &quot;standalone&quot;,
-    &quot;background_color&quot;: &quot;#0f172a&quot;,
-    &quot;theme_color&quot;: &quot;#0f172a&quot;
+    &quot;background_color&quot;: &quot;#0b0f19&quot;,
+    &quot;theme_color&quot;: &quot;#0b0f19&quot;
   }">
   <style>
     body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
   </style>
 </head>
-<body class="pb-12 min-h-screen">
+<body class="pb-16 min-h-screen">
   <!-- Header -->
   <header class="p-4 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-[#0b0f19]/90 backdrop-blur z-50">
     <div>
       <h1 class="text-xl font-extrabold tracking-wider text-emerald-400">PACK<span class="text-slate-100">TACTICS</span></h1>
-      <p class="text-xs text-slate-400 font-medium">Matchday & Packing Hub</p>
+      <p class="text-[10px] text-slate-400 font-medium">Match & Trip Packing Hub</p>
     </div>
-    <div class="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full text-xs text-emerald-400 font-semibold">
-      Match Mode
+    <div class="flex gap-2">
+      <button onclick="toggleMode('match')" id="btn-mode-match" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+        ⚽ Mecz
+      </button>
+      <button onclick="toggleMode('trip')" id="btn-mode-trip" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+        🏕️ Wyjazd
+      </button>
     </div>
   </header>
 
   <main class="p-4 max-w-md mx-auto space-y-5">
-    <!-- Countdown Card -->
-    <div class="glass rounded-2xl p-4 shadow-xl">
-      <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Odliczanie do Wyjazdu</h2>
+    
+    <!-- Matchday Countdown Card -->
+    <div id="countdownCard" class="glass rounded-2xl p-4 shadow-xl">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Odliczanie do Wyjazdu</h2>
+        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Live</span>
+      </div>
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
           <span id="leaveTimer" class="block text-lg font-bold text-amber-400">--:--</span>
@@ -50,8 +59,8 @@
       </div>
     </div>
 
-    <!-- Time Setup -->
-    <details class="glass rounded-2xl p-4 cursor-pointer">
+    <!-- Match Settings -->
+    <details id="timeSetupDetails" class="glass rounded-2xl p-4 cursor-pointer">
       <summary class="text-sm font-semibold text-slate-200 flex justify-between items-center">
         ⚙️ Ustawienia Godzinowe
       </summary>
@@ -71,8 +80,29 @@
       </div>
     </details>
 
-    <!-- Tag Selectors -->
-    <div class="glass rounded-2xl p-4">
+    <!-- Trip Settings (Hidden by default) -->
+    <div id="tripSetupCard" class="glass rounded-2xl p-4 hidden">
+      <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Parametry Wyjazdu</h2>
+      <div class="flex justify-between items-center text-xs mb-3">
+        <label class="text-slate-300">Liczba dni wyjazdu:</label>
+        <div class="flex items-center gap-3">
+          <button onclick="changeDays(-1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">-</button>
+          <span id="daysCount" class="text-sm font-bold text-emerald-400">3</span>
+          <button onclick="changeDays(1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">+</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button onclick="toggleTag('plazawoda')" id="tag-plazawoda" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+          🏖️ Plaża / Woda
+        </button>
+        <button onclick="toggleTag('wieczor')" id="tag-wieczor" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">
+          🔥 Chłodne wieczory
+        </button>
+      </div>
+    </div>
+
+    <!-- Match Tag Selectors -->
+    <div id="matchTagsCard" class="glass rounded-2xl p-4">
       <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Warunki Meczowe</h2>
       <div class="grid grid-cols-2 gap-2 text-xs">
         <button onclick="toggleTag('zimno')" id="tag-zimno" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">
@@ -90,7 +120,30 @@
       </div>
     </div>
 
-    <!-- Packing Progress -->
+    <!-- Add Custom Item Form -->
+    <details class="glass rounded-2xl p-4 cursor-pointer">
+      <summary class="text-sm font-semibold text-emerald-400 flex justify-between items-center">
+        ➕ Dodaj Własny Przedmiot do Szafy
+      </summary>
+      <div class="mt-3 space-y-3 pt-3 border-t border-slate-800 text-xs">
+        <input type="text" id="newItemName" placeholder="Nazwa przedmiotu (np. Klej do korków)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+        <select id="newItemPocket" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+          <option value="Komora Boczna">Komora Boczna (Drobne)</option>
+          <option value="Komora Główna">Komora Główna (Sprzęt & Ubrania)</option>
+          <option value="Dolna Komora (Spód)">Dolna Komora (Spód)</option>
+          <option value="Pojemniki & Nawodnienie">Pojemniki & Nawodnienie</option>
+        </select>
+        <select id="newItemTag" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+          <option value="baza">Baza (Zawsze)</option>
+          <option value="zimno">Zimno (#zimno)</option>
+          <option value="deszcz">Deszcz (#deszcz)</option>
+          <option value="wyjazd">Wyjazd (#wyjazd)</option>
+        </select>
+        <button onclick="addCustomItem()" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl">Dodaj do Bazy</button>
+      </div>
+    </details>
+
+    <!-- Packing Progress Bar -->
     <div>
       <div class="flex justify-between text-xs font-semibold mb-1">
         <span class="text-slate-300">Postęp Pakowania</span>
@@ -106,32 +159,60 @@
   </main>
 
   <script>
-    const database = [
-      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pocket: "Dolna Komora (Spód)", tag: "baza", sub: "Do otwarcia pod prysznicem" },
-      { id: 2, item: "Soczewki w etui + Krople do oczu", pocket: "Komora Boczna", tag: "baza", sub: "" },
-      { id: 3, item: "Kluczyki + Telefon + Zegarek", pocket: "Komora Boczna", tag: "baza", sub: "" },
-      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pocket: "Komora Boczna", tag: "baza", sub: "" },
-      { id: 5, item: "Maść rozgrzewająca", pocket: "Komora Boczna", tag: "zimno", sub: "Aktywowane przez: #zimno" },
-      { id: 6, item: "Korki Lanki (FG)", pocket: "Komora Główna", tag: "fg", sub: "Nawierzchnia naturalna" },
-      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pocket: "Komora Główna", tag: "ag", sub: "Nawierzchnia sztuczna" },
-      { id: 8, item: "Korki Wkręty / Mixy (SG)", pocket: "Komora Główna", tag: "sg", sub: "Mokra / grząska murawa" },
-      { id: 9, item: "Klapki pod prysznic", pocket: "Komora Główna", tag: "baza", sub: "" },
-      { id: 10, item: "Getry + Ochraniacze + Spodenki", pocket: "Komora Główna", tag: "baza", sub: "" },
-      { id: 11, item: "Bielizna termoaktywna + Komin", pocket: "Komora Główna", tag: "zimno", sub: "Aktywowane przez: #zimno" },
-      { id: 12, item: "Rękawiczki meczowe + Czapka", pocket: "Komora Główna", tag: "zimno", sub: "Aktywowane przez: #zimno" },
-      { id: 13, item: "Ortalion / Kurtka deszczowa", pocket: "Komora Główna", tag: "deszcz", sub: "Aktywowane przez: #deszcz" },
-      { id: 14, item: "Zapasowa para getrów/skarpet", pocket: "Komora Główna", tag: "deszcz", sub: "Aktywowane przez: #deszcz" },
-      { id: 15, item: "Pojemniki z jedzeniem", pocket: "Pojemniki & Nawodnienie", tag: "baza", sub: "Przed- i poregeneracyjny" },
-      { id: 16, item: "Bidon z izotonikiem", pocket: "Pojemniki & Nawodnienie", tag: "baza", sub: "" }
+    let currentMode = 'match';
+    let tripDays = 3;
+
+    let database = [
+      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pocket: "Dolna Komora (Spód)", tag: "baza", mode: "all" },
+      { id: 2, item: "Soczewki w etui + Krople do oczu", pocket: "Komora Boczna", tag: "baza", mode: "all" },
+      { id: 3, item: "Kluczyki + Telefon + Zegarek", pocket: "Komora Boczna", tag: "baza", mode: "all" },
+      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pocket: "Komora Boczna", tag: "baza", mode: "match" },
+      { id: 5, item: "Maść rozgrzewająca", pocket: "Komora Boczna", tag: "zimno", mode: "match" },
+      { id: 6, item: "Korki Lanki (FG)", pocket: "Komora Główna", tag: "fg", mode: "match" },
+      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pocket: "Komora Główna", tag: "ag", mode: "match" },
+      { id: 8, item: "Korki Wkręty / Mixy (SG)", pocket: "Komora Główna", tag: "sg", mode: "match" },
+      { id: 9, item: "Klapki pod prysznic", pocket: "Komora Główna", tag: "baza", mode: "all" },
+      { id: 10, item: "Getry + Ochraniacze + Spodenki", pocket: "Komora Główna", tag: "baza", mode: "match" },
+      { id: 11, item: "Bielizna termoaktywna + Komin", pocket: "Komora Główna", tag: "zimno", mode: "match" },
+      { id: 12, item: "Rękawiczki meczowe + Czapka", pocket: "Komora Główna", tag: "zimno", mode: "match" },
+      // ORTALION ZARÓWNO NA ZIMNO JAK I DESZCZ
+      { id: 13, item: "Ortalion / Kurtka przeciwdeszczowa", pocket: "Komora Główna", tag: "deszcz_lub_zimno", mode: "match" },
+      { id: 14, item: "Zapasowa para getrów/skarpet", pocket: "Komora Główna", tag: "deszcz", mode: "match" },
+      { id: 15, item: "Pojemniki z jedzeniem", pocket: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
+      { id: 16, item: "Bidon z izotonikiem", pocket: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
+      
+      // Wyjazdy
+      { id: 101, item: "Koszulki / T-shirty", pocket: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
+      { id: 102, item: "Bielizna + Skarpety", pocket: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
+      { id: 103, item: "Kąpielówki + Ręcznik plażowy", pocket: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
+      { id: 104, item: "Gruba bluza + Ciepłe dresy", pocket: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
+      { id: 105, item: "Ładowarka + Powerbank", pocket: "Komora Boczna", tag: "baza", mode: "trip" }
     ];
 
     let activeTags = new Set(["baza", "fg"]);
     let checkedItems = new Set();
 
+    function toggleMode(mode) {
+      currentMode = mode;
+      document.getElementById('btn-mode-match').className = mode === 'match' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+      document.getElementById('btn-mode-trip').className = mode === 'trip' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+
+      document.getElementById('countdownCard').style.display = mode === 'match' ? 'block' : 'none';
+      document.getElementById('timeSetupDetails').style.display = mode === 'match' ? 'block' : 'none';
+      document.getElementById('matchTagsCard').style.display = mode === 'match' ? 'block' : 'none';
+      document.getElementById('tripSetupCard').style.display = mode === 'trip' ? 'block' : 'none';
+
+      renderChecklist();
+    }
+
+    function changeDays(delta) {
+      tripDays = Math.max(1, tripDays + delta);
+      document.getElementById('daysCount').innerText = tripDays;
+      renderChecklist();
+    }
+
     function toggleTag(tag) {
-      if(tag === 'ag' || tag === 'sg') {
-        activeTags.delete('fg'); activeTags.delete('ag'); activeTags.delete('sg');
-      }
+      if(tag === 'ag' || tag === 'sg') { activeTags.delete('fg'); activeTags.delete('ag'); activeTags.delete('sg'); }
       if(activeTags.has(tag)) activeTags.delete(tag);
       else activeTags.add(tag);
       if(!activeTags.has('ag') && !activeTags.has('sg')) activeTags.add('fg');
@@ -141,23 +222,40 @@
     }
 
     function updateTagUI() {
-      ['zimno', 'deszcz', 'ag', 'sg'].forEach(t => {
+      ['zimno', 'deszcz', 'ag', 'sg', 'plazawoda', 'wieczor'].forEach(t => {
         const btn = document.getElementById(`tag-${t}`);
-        if(activeTags.has(t)) {
-          btn.className = "p-2.5 rounded-xl border text-left transition bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold";
-        } else {
-          btn.className = "p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400";
+        if(btn) {
+          if(activeTags.has(t)) btn.className = "p-2.5 rounded-xl border text-left bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold";
+          else btn.className = "p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400";
         }
       });
+    }
+
+    function addCustomItem() {
+      const name = document.getElementById('newItemName').value;
+      const pocket = document.getElementById('newItemPocket').value;
+      const tag = document.getElementById('newItemTag').value;
+
+      if(!name) return;
+
+      const newItem = { id: Date.now(), item: name, pocket: pocket, tag: tag, mode: 'all' };
+      database.push(newItem);
+      document.getElementById('newItemName').value = '';
+      renderChecklist();
     }
 
     function renderChecklist() {
       const container = document.getElementById('checklistContainer');
       container.innerHTML = '';
 
-      const filtered = database.filter(i => activeTags.has(i.tag));
-      const grouped = {};
+      const filtered = database.filter(i => {
+        if (i.mode !== 'all' && i.mode !== currentMode) return false;
+        if (i.tag === 'baza') return true;
+        if (i.tag === 'deszcz_lub_zimno') return activeTags.has('deszcz') || activeTags.has('zimno');
+        return activeTags.has(i.tag) || (currentMode === 'trip' && i.tag === 'wyjazd_multi');
+      });
 
+      const grouped = {};
       filtered.forEach(item => {
         if(!grouped[item.pocket]) grouped[item.pocket] = [];
         grouped[item.pocket].push(item);
@@ -176,12 +274,16 @@
           const isChecked = checkedItems.has(i.id);
           if(isChecked) checkedCount++;
           
+          let displayLabel = i.item;
+          if(currentMode === 'trip' && i.tag === 'wyjazd_multi') {
+            displayLabel = `${i.item} (${tripDays} szt.)`;
+          }
+
           html += `
             <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/50 cursor-pointer transition">
               <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${i.id})" class="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900">
               <div>
-                <span class="text-sm block ${isChecked ? 'line-through text-slate-500' : 'text-slate-200'}">${i.item}</span>
-                ${i.sub ? `<span class="text-[10px] text-slate-400 block">${i.sub}</span>` : ''}
+                <span class="text-sm block ${isChecked ? 'line-through text-slate-500' : 'text-slate-200'}">${displayLabel}</span>
               </div>
             </label>
           `;
