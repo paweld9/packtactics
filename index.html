@@ -258,15 +258,17 @@
     }
 
     function toggleCustomRatioInput() {
-      var rule = document.getElementById('newItemRatioRule').value;
+      var elRule = document.getElementById('newItemRatioRule');
+      if(!elRule) return;
+      var rule = elRule.value;
       var inp = document.getElementById('newItemCustomVal');
       var hint = document.getElementById('ratioHint');
       if(rule === 'custom') {
-        inp.classList.remove('hidden');
-        hint.classList.remove('hidden');
+        if(inp) inp.classList.remove('hidden');
+        if(hint) hint.classList.remove('hidden');
       } else {
-        inp.classList.add('hidden');
-        hint.classList.add('hidden');
+        if(inp) inp.classList.add('hidden');
+        if(hint) hint.classList.add('hidden');
       }
     }
 
@@ -324,7 +326,6 @@
       drawChecklist();
     }
 
-    // Dodanie nowej stałej definicji w Szafie
     function addNewWardrobeDefinition() {
       var n = document.getElementById('newItemName').value;
       var p = document.getElementById('newItemPocket').value;
@@ -341,7 +342,6 @@
       populateWardrobeDropdown();
     }
 
-    // Wypełnienie rozwijanej listy Select przedmioty ze Szafy
     function populateWardrobeDropdown() {
       var sel = document.getElementById('selectWardrobeItem');
       sel.innerHTML = '<option value="">-- Wybierz przedmiot ze Szafy --</option>';
@@ -356,7 +356,6 @@
         sel.appendChild(opt);
       }
 
-      // Mini podgląd do usuwania definicji ze szafy
       var delBox = document.getElementById('wardrobeDeleteList');
       delBox.innerHTML = '';
       for(var j=0; j<filtered.length; j++) {
@@ -369,7 +368,6 @@
       }
     }
 
-    // Akcja dodania wybranego z Dropdownu przedmiotu do checklisty wyjazdu
     function addSelectedFromWardrobe() {
       var sel = document.getElementById('selectWardrobeItem');
       var val = sel.value;
@@ -381,7 +379,6 @@
       drawChecklist();
     }
 
-    // Ukrycie przedmiotu na ten konkretny wyjazd (krzyżyk na głównej liście)
     function removeFromChecklist(id) {
       delete activeTripWardrobeIds[id];
       delete checkedSet[id];
@@ -389,7 +386,6 @@
       drawChecklist();
     }
 
-    // Trwałe usunięcie z bazy Szafy
     function permanentlyDeleteWardrobeItem(id) {
       customWardrobe = customWardrobe.filter(function(i) { return i.id !== id; });
       delete activeTripWardrobeIds[id];
@@ -413,14 +409,10 @@
       drawChecklist();
     }
 
-    // Elastyczny przelicznik ilościowy z zaokrąglaniem
     function computeQuantity(item) {
       if(curMode !== 'trip') return null;
-      
-      // Standardowe przedmioty wbudowane (1:1)
       if(item.tag === 'wyjazd_multi') return numDays;
 
-      // Przedmioty z Szafy
       if(item.rule === 'daily') return numDays;
       if(item.rule === 'custom' && item.customVal > 0) {
         return Math.max(1, Math.round(numDays / item.customVal));
@@ -434,8 +426,6 @@
       box.innerHTML = '';
 
       var list = [];
-      
-      // 1. Przedmioty wbudowane
       for(var i=0; i<db.length; i++) {
         var it = db[i];
         if(it.mode !== 'all' && it.mode !== curMode) continue;
@@ -449,7 +439,6 @@
         }
       }
 
-      // 2. Aktywne przedmioty z Szafy dla tego wyjazdu
       for(var c=0; c<customWardrobe.length; c++) {
         var cItem = customWardrobe[c];
         if(cItem.mode === curMode && activeTripWardrobeIds[cItem.id]) {
@@ -535,6 +524,8 @@
       }
     }
 
+    // Inicjalizacja bezbłędna
+    toggleCustomRatioInput();
     refreshTagUI();
     populateWardrobeDropdown();
     drawChecklist();
