@@ -252,42 +252,45 @@
     var curMode = 'match';
     var numDays = 3;
 
-    var defaultDb = [
-      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pMatch: "Dolna Komora (Spód)", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
-      { id: 2, item: "Soczewki w etui + Krople do oczu", pMatch: "Komora Boczna", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
-      { id: 3, item: "Kluczyki + Telefon + Zegarek", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "all" },
-      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "match" },
-      { id: 5, item: "Maść rozgrzewająca", pMatch: "Komora Boczna", pTrip: "Kosmetyczka", tag: "zimno", mode: "match" },
-      { id: 6, item: "Korki Lanki (FG)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "fg", mode: "match" },
-      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "ag", mode: "match" },
-      { id: 8, item: "Korki Wkręty / Mixy (SG)", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "sg", mode: "match" },
-      { id: 9, item: "Klapki pod prysznic", pMatch: "Komora Główna", pTrip: "Kosmetyczka", tag: "baza", mode: "all" },
-      { id: 10, item: "Getry + Ochraniacze + Spodenki", pMatch: "Komora Główna", pTrip: "Komora Główna", tag: "baza", mode: "match" },
-      { id: 11, item: "Bielizna termoaktywna + Komin", pMatch: "Komora Główna", pTrip: "Ubrania Wyjazdowe", tag: "zimno", mode: "match" },
-      { id: 12, item: "Rękawiczki meczowe + Czapka", pMatch: "Komora Główna", pTrip: "Ubrania Wyjazdowe", tag: "zimno", mode: "match" },
-      { id: 13, item: "Ortalion / Kurtka przeciwdeszczowa", pMatch: "Komora Główna", pTrip: "Ubrania Wyjazdowe", tag: "deszcz_lub_zimno", mode: "match" },
-      { id: 14, item: "Zapasowa para getrów/skarpet", pMatch: "Komora Główna", pTrip: "Ubrania Wyjazdowe", tag: "deszcz", mode: "match" },
-      { id: 15, item: "Pojemniki z jedzeniem", pMatch: "Pojemniki & Nawodnienie", pTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
-      { id: 16, item: "Bidon z izotonikiem", pMatch: "Pojemniki & Nawodnienie", pTrip: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
-      { id: 101, item: "Koszulki / T-shirty", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
-      { id: 102, item: "Bielizna + Skarpety", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
-      { id: 103, item: "Kąpielówki + Ręcznik plażowy", pMatch: "Akcesoria Wyjazdowe", pTrip: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
-      { id: 104, item: "Gruba bluza + Ciepłe dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
-      { id: 105, item: "Ładowarka + Powerbank", pMatch: "Komora Boczna", pTrip: "Komora Boczna", tag: "baza", mode: "trip" },
-      { id: 106, item: "Buty trekkingowe / w góry", pMatch: "Komora Główna", pTrip: "Akcesoria Wyjazdowe", tag: "gory", mode: "trip" },
-      { id: 107, item: "Plecak trekkingowy / mały", pMatch: "Plecak", pTrip: "Plecak", tag: "gory", mode: "trip" },
-      { id: 108, item: "Biblia", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" },
-      { id: 109, item: "Zakreślacze + Długopis", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" },
-      { id: 110, item: "Notes / Zeszyt", pMatch: "Plecak", pTrip: "Plecak", tag: "jafowy", mode: "trip" }
+    // Domyślne bazy oddzielone dla meczu (mode: "match") i wyjazdu (mode: "trip")
+    var defaultMatchDb = [
+      { id: 1, item: "Ręcznik + Żel + Antyperspirant", pMatch: "Dolna Komora (Spód)", tag: "baza", mode: "match" },
+      { id: 2, item: "Soczewki w etui + Krople do oczu", pMatch: "Komora Boczna", tag: "baza", mode: "match" },
+      { id: 3, item: "Kluczyki + Telefon + Zegarek", pMatch: "Komora Boczna", tag: "baza", mode: "match" },
+      { id: 4, item: "Nożyczki + Tejp / Taśma do getrów", pMatch: "Komora Boczna", tag: "baza", mode: "match" },
+      { id: 5, item: "Maść rozgrzewająca", pMatch: "Komora Boczna", tag: "zimno", mode: "match" },
+      { id: 6, item: "Korki Lanki (FG)", pMatch: "Komora Główna", tag: "fg", mode: "match" },
+      { id: 7, item: "Korki Sztuczna Trawa (AG/Turfy)", pMatch: "Komora Główna", tag: "ag", mode: "match" },
+      { id: 8, item: "Korki Wkręty / Mixy (SG)", pMatch: "Komora Główna", tag: "sg", mode: "match" },
+      { id: 9, item: "Klapki pod prysznic", pMatch: "Komora Główna", tag: "baza", mode: "match" },
+      { id: 10, item: "Getry + Ochraniacze + Spodenki", pMatch: "Komora Główna", tag: "baza", mode: "match" },
+      { id: 11, item: "Bielizna termoaktywna + Komin", pMatch: "Komora Główna", tag: "zimno", mode: "match" },
+      { id: 12, item: "Rękawiczki meczowe + Czapka", pMatch: "Komora Główna", tag: "zimno", mode: "match" },
+      { id: 13, item: "Ortalion / Kurtka przeciwdeszczowa", pMatch: "Komora Główna", tag: "deszcz_lub_zimno", mode: "match" },
+      { id: 14, item: "Zapasowa para getrów/skarpet", pMatch: "Komora Główna", tag: "deszcz", mode: "match" },
+      { id: 15, item: "Pojemniki z jedzeniem", pMatch: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" },
+      { id: 16, item: "Bidon z izotonikiem", pMatch: "Pojemniki & Nawodnienie", tag: "baza", mode: "match" }
     ];
 
-    var db = [];
-    var customWardrobe = [];
+    var defaultTripDb = [
+      { id: 101, item: "Koszulki / T-shirty", pTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
+      { id: 102, item: "Bielizna + Skarpety", pTrip: "Ubrania Wyjazdowe", tag: "wyjazd_multi", mode: "trip" },
+      { id: 103, item: "Kąpielówki + Ręcznik plażowy", pTrip: "Akcesoria Wyjazdowe", tag: "plazawoda", mode: "trip" },
+      { id: 104, item: "Gruba bluza + Ciepłe dresy", pTrip: "Ubrania Wyjazdowe", tag: "wieczor", mode: "trip" },
+      { id: 105, item: "Ładowarka + Powerbank", pTrip: "Komora Boczna", tag: "baza", mode: "trip" },
+      { id: 106, item: "Buty trekkingowe / w góry", pTrip: "Akcesoria Wyjazdowe", tag: "gory", mode: "trip" },
+      { id: 107, item: "Plecak trekkingowy / mały", pTrip: "Plecak", tag: "gory", mode: "trip" },
+      { id: 108, item: "Biblia", pTrip: "Plecak", tag: "jafowy", mode: "trip" },
+      { id: 109, item: "Zakreślacze + Długopis", pTrip: "Plecak", tag: "jafowy", mode: "trip" },
+      { id: 110, item: "Notes / Zeszyt", pTrip: "Plecak", tag: "jafowy", mode: "trip" }
+    ];
+
+    var matchDb = [];
+    var tripDb = [];
     var activeTripWardrobeIds = {};
     var myTags = { "baza": true, "fg": true };
     var checkedSet = {};
     
-    // Dynamiczne bloki użytkownika
     var customBlocks = {
       trip: [
         { id: 'plazawoda', name: '🏖️ Plaża / Woda' },
@@ -303,7 +306,6 @@
       ]
     };
     
-    // Powiązania przedmiotów z blokami customowymi: { blockId: [itemIds...] }
     var blockItemMappings = {
       'plazawoda': [103],
       'wieczor': [104],
@@ -315,26 +317,18 @@
 
     var modalTargetMode = 'trip';
 
-    function loadDb() {
-      var saved = localStorage.getItem('packtactics_db');
-      if(saved) {
-        try { return JSON.parse(saved); } catch(e) {}
-      }
-      return defaultDb;
+    function loadDatabases() {
+      var savedMatch = localStorage.getItem('packtactics_match_db');
+      matchDb = savedMatch ? JSON.parse(savedMatch) : defaultMatchDb;
+
+      var savedTrip = localStorage.getItem('packtactics_trip_db');
+      tripDb = savedTrip ? JSON.parse(savedTrip) : defaultTripDb;
     }
 
-    function saveDb() { localStorage.setItem('packtactics_db', JSON.stringify(db)); }
-
-    function loadWardrobe() {
-      var saved = localStorage.getItem('packtactics_wardrobe');
-      return saved ? JSON.parse(saved) : [
-        { id: 901, item: "iPad", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 0 },
-        { id: 902, item: "MacBook", pMatch: "Plecak", pTrip: "Plecak", tag: "szafa_custom", mode: "trip", rule: "fixed", customVal: 0 },
-        { id: 903, item: "Spodnie / Dresy", pMatch: "Ubrania Wyjazdowe", pTrip: "Ubrania Wyjazdowe", tag: "szafa_custom", mode: "trip", rule: "custom", customVal: 0.4 }
-      ];
+    function saveDatabases() {
+      localStorage.setItem('packtactics_match_db', JSON.stringify(matchDb));
+      localStorage.setItem('packtactics_trip_db', JSON.stringify(tripDb));
     }
-
-    function saveWardrobe() { localStorage.setItem('packtactics_wardrobe', JSON.stringify(customWardrobe)); }
 
     function loadActiveTripWardrobe() {
       var saved = localStorage.getItem('packtactics_active_wardrobe');
@@ -409,7 +403,6 @@
     }
 
     function refreshTagUI() {
-      // Renderowanie bloków dla wyjazdu
       var tripContainer = document.getElementById('tripBlocksContainer');
       if(tripContainer) {
         tripContainer.innerHTML = '';
@@ -427,7 +420,6 @@
         }
       }
 
-      // Renderowanie bloków dla meczu
       var matchContainer = document.getElementById('matchBlocksContainer');
       if(matchContainer) {
         matchContainer.innerHTML = '';
@@ -455,11 +447,9 @@
       var itemsBox = document.getElementById('modalItemsChecklist');
       if(itemsBox) {
         itemsBox.innerHTML = '';
-        var allItems = db.concat(customWardrobe);
-        for(var i=0; i<allItems.length; i++) {
-          var it = allItems[i];
-          if(it.mode !== 'all' && it.mode !== modalTargetMode) continue;
-
+        var currentActiveDb = (modalTargetMode === 'match') ? matchDb : tripDb;
+        for(var i=0; i<currentActiveDb.length; i++) {
+          var it = currentActiveDb[i];
           var row = document.createElement('label');
           row.className = "flex items-center gap-2 cursor-pointer text-slate-300 text-xs py-1 px-1 hover:bg-slate-800/60 rounded";
           row.innerHTML = '<input type="checkbox" value="' + it.id + '" class="blockModalItemCheckbox w-3.5 h-3.5 rounded border-slate-700 text-emerald-500 bg-slate-950"><span>' + it.item + '</span>';
@@ -554,7 +544,7 @@
       
       if(!nEl || !nEl.value) return;
       
-      var n = nEl.value;
+      var n = nEl.value.trim();
       var p = pEl ? pEl.value : 'Plecak';
       var rule = rEl ? rEl.value : 'fixed';
       var customVal = 0;
@@ -562,12 +552,27 @@
       if(rule === 'daily') customVal = 1.0;
       else if(rule === 'custom') customVal = vEl ? (parseFloat(vEl.value) || 0.4) : 0.4;
       
-      var itemObj = { id: Date.now(), item: n, pMatch: p, pTrip: p, tag: "szafa_custom", mode: curMode, rule: rule, customVal: customVal };
-      customWardrobe.push(itemObj);
-      saveWardrobe();
+      var itemObj = { 
+        id: Date.now(), 
+        item: n, 
+        pMatch: (curMode === 'match' ? p : undefined), 
+        pTrip: (curMode === 'trip' ? p : undefined), 
+        tag: "szafa_custom", 
+        mode: curMode, 
+        rule: rule, 
+        customVal: customVal 
+      };
+
+      if (curMode === 'match') {
+        matchDb.push(itemObj);
+      } else {
+        tripDb.push(itemObj);
+      }
       
+      saveDatabases();
       nEl.value = '';
       populateWardrobeDropdown();
+      drawChecklist();
     }
 
     function populateWardrobeDropdown() {
@@ -575,17 +580,14 @@
       if(!sel) return;
       sel.innerHTML = '<option value="">-- Wybierz przedmiot ze Szafy --</option>';
       
-      // Pokazujemy zarówno przedmioty z bazy (db) dopasowane do trybu, jak i customowe
-      var filteredDb = db.filter(function(i) { return i.mode === 'all' || i.mode === curMode; });
-      var filteredCustom = customWardrobe.filter(function(i) { return i.mode === curMode; });
-      var allAvailable = filteredDb.concat(filteredCustom);
+      var currentDb = (curMode === 'match') ? matchDb : tripDb;
 
-      for(var i=0; i<allAvailable.length; i++) {
-        var item = allAvailable[i];
-        var pocket = curMode === 'trip' ? (item.pTrip || item.pMatch) : item.pMatch;
+      for(var i=0; i<currentDb.length; i++) {
+        var item = currentDb[i];
+        var pocket = curMode === 'trip' ? (item.pTrip || item.pMatch || 'Plecak') : (item.pMatch || item.pTrip || 'Plecak');
         var opt = document.createElement('option');
         opt.value = item.id;
-        opt.innerText = item.item + ' (' + (pocket || 'Plecak') + ')';
+        opt.innerText = item.item + ' (' + pocket + ')';
         sel.appendChild(opt);
       }
 
@@ -593,14 +595,12 @@
       if(!delBox) return;
       delBox.innerHTML = '';
       
-      // Lista do zarządzania całą szafą (bazowe + customowe)
-      for(var j=0; j<allAvailable.length; j++) {
-        var item2 = allAvailable[j];
+      for(var j=0; j<currentDb.length; j++) {
+        var item2 = currentDb[j];
         var div = document.createElement('div');
         div.className = "flex justify-between items-center text-[11px] text-slate-400 py-0.5";
-        var isCustom = item2.tag === 'szafa_custom';
         div.innerHTML = '<span>' + item2.item + '</span>' +
-          '<button type="button" onclick="' + (isCustom ? 'permanentlyDeleteWardrobeItem(' + item2.id + ')' : 'deleteBuiltinItem(' + item2.id + ')') + '" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
+          '<button type="button" onclick="deleteDbItem(' + item2.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
         delBox.appendChild(div);
       }
     }
@@ -612,16 +612,8 @@
       if(!val) return;
 
       var parsedId = parseInt(val, 10);
-      // Sprawdzamy czy to przedmiot customowy czy z głównej bazy
-      var isCustom = customWardrobe.some(function(i) { return i.id === parsedId; });
-      if (isCustom) {
-        activeTripWardrobeIds[parsedId] = true;
-        saveActiveTripWardrobe();
-      } else {
-        // Jeśli dodano przedmiot z bazy domyślnej, a nie był widoczny, traktujemy go jako zaznaczony
-        activeTripWardrobeIds[parsedId] = true;
-        saveActiveTripWardrobe();
-      }
+      activeTripWardrobeIds[parsedId] = true;
+      saveActiveTripWardrobe();
       sel.value = "";
       drawChecklist();
     }
@@ -633,21 +625,16 @@
       drawChecklist();
     }
 
-    function permanentlyDeleteWardrobeItem(id) {
-      customWardrobe = customWardrobe.filter(function(i) { return i.id !== id; });
+    function deleteDbItem(id) {
+      if (curMode === 'match') {
+        matchDb = matchDb.filter(function(i) { return i.id !== id; });
+      } else {
+        tripDb = tripDb.filter(function(i) { return i.id !== id; });
+      }
       delete activeTripWardrobeIds[id];
       delete checkedSet[id];
-      saveWardrobe();
+      saveDatabases();
       saveActiveTripWardrobe();
-      populateWardrobeDropdown();
-      drawChecklist();
-    }
-
-    function deleteBuiltinItem(id) {
-      db = db.filter(function(i) { return i.id !== id; });
-      delete activeTripWardrobeIds[id];
-      delete checkedSet[id];
-      saveDb();
       populateWardrobeDropdown();
       drawChecklist();
     }
@@ -676,21 +663,11 @@
       box.innerHTML = '';
 
       var list = [];
-      var allCombinedItems = db.concat(customWardrobe);
+      var currentDb = (curMode === 'match') ? matchDb : tripDb;
 
-      for(var i=0; i<allCombinedItems.length; i++) {
-        var it = allCombinedItems[i];
-        if(it.tag === 'szafa_custom' || activeTripWardrobeIds[it.id]) {
-          if(it.mode === curMode || it.mode === 'all' || activeTripWardrobeIds[it.id]) {
-            if(it.mode === 'all' || it.mode === curMode || curMode === 'all') {
-              // Dodajemy
-            }
-          }
-        }
-
-        var matchModeOK = (it.mode === 'all' || it.mode === curMode);
-        if(!matchModeOK && !activeTripWardrobeIds[it.id]) continue;
-
+      for(var i=0; i<currentDb.length; i++) {
+        var it = currentDb[i];
+        
         if(it.tag === 'baza') { list.push(it); continue; }
         if(activeTripWardrobeIds[it.id]) { list.push(it); continue; }
         
@@ -704,7 +681,6 @@
           continue;
         }
 
-        // Sprawdzanie dynamicznych powiązań bloków użytkownika
         var addedViaCustomBlock = false;
         var blockKeys = Object.keys(blockItemMappings);
         for(var bk=0; bk<blockKeys.length; bk++) {
@@ -725,7 +701,7 @@
       var groups = {};
       for(var j=0; j<list.length; j++) {
         var item = list[j];
-        var pocket = curMode === 'trip' ? (item.pTrip || item.pMatch) : item.pMatch;
+        var pocket = curMode === 'trip' ? (item.pTrip || item.pMatch || 'Plecak') : (item.pMatch || item.pTrip || 'Plecak');
         if(!groups[pocket]) groups[pocket] = [];
         groups[pocket].push(item);
       }
@@ -753,9 +729,9 @@
             lbl = o.item + ' (' + qty + ' szt.)';
           }
 
-          var deleteBtnHtml = (o.tag === "szafa_custom" || activeTripWardrobeIds[o.id]) ?
+          var deleteBtnHtml = activeTripWardrobeIds[o.id] ?
             '<button type="button" onclick="removeFromChecklist(' + o.id + ')" class="text-slate-500 hover:text-amber-400 text-xs px-2 py-1 transition font-bold" title="Ukryj">✕</button>' :
-            '<button type="button" onclick="deleteBuiltinItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń z bazy">✕</button>';
+            '<button type="button" onclick="deleteDbItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń z szafy">✕</button>';
 
           html += '<div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition">' +
             '<label class="flex items-start gap-3 cursor-pointer flex-1 mr-2">' +
@@ -868,8 +844,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', function() {
-      db = loadDb();
-      customWardrobe = loadWardrobe();
+      loadDatabases();
       activeTripWardrobeIds = loadActiveTripWardrobe();
       loadCustomBlocksData();
 
