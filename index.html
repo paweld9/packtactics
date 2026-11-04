@@ -234,9 +234,9 @@
         </div>
 
         <div>
-          <label class="block text-slate-400 mb-1">Wybierz przedmioty ze Szafy przypisane do tego bloku:</label>
+          <label class="block text-slate-400 mb-1">Wybierz przedmioty z Szafy dla tego bloku:</label>
           <div id="modalItemsChecklist" class="max-h-48 overflow-y-auto space-y-1.5 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-            <!-- Tutaj skrypt ładuje listę przedmiotów z bazy -->
+            <!-- Tutaj skrypt ładuje listę przedmiotów z bazy dla odpowiedniego trybu -->
           </div>
         </div>
       </div>
@@ -455,9 +455,13 @@
       var itemsBox = document.getElementById('modalItemsChecklist');
       if(itemsBox) {
         itemsBox.innerHTML = '';
+        // Pobieramy wyłącznie przedmioty pasujące do aktualnego trybu (match lub trip/all)
         var allItems = db.concat(customWardrobe);
         for(var i=0; i<allItems.length; i++) {
           var it = allItems[i];
+          // Filtracja szafy i bazy pod aktualny tryb modalTargetMode
+          if(it.mode !== 'all' && it.mode !== modalTargetMode) continue;
+
           var row = document.createElement('label');
           row.className = "flex items-center gap-2 cursor-pointer text-slate-300 text-xs py-1 px-1 hover:bg-slate-800/60 rounded";
           row.innerHTML = '<input type="checkbox" value="' + it.id + '" class="blockModalItemCheckbox w-3.5 h-3.5 rounded border-slate-700 text-emerald-500 bg-slate-950"><span>' + it.item + '</span>';
