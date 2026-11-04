@@ -455,11 +455,9 @@
       var itemsBox = document.getElementById('modalItemsChecklist');
       if(itemsBox) {
         itemsBox.innerHTML = '';
-        // Pobieramy wyłącznie przedmioty pasujące do aktualnego trybu (match lub trip/all)
         var allItems = db.concat(customWardrobe);
         for(var i=0; i<allItems.length; i++) {
           var it = allItems[i];
-          // Filtracja szafy i bazy pod aktualny tryb modalTargetMode
           if(it.mode !== 'all' && it.mode !== modalTargetMode) continue;
 
           var row = document.createElement('label');
@@ -577,25 +575,32 @@
       if(!sel) return;
       sel.innerHTML = '<option value="">-- Wybierz przedmiot ze Szafy --</option>';
       
-      var filtered = customWardrobe.filter(function(i) { return i.mode === curMode; });
-      for(var i=0; i<filtered.length; i++) {
-        var item = filtered[i];
-        var pocket = curMode === 'trip' ? item.pTrip : item.pMatch;
+      // Pokazujemy zarówno przedmioty z bazy (db) dopasowane do trybu, jak i customowe
+      var filteredDb = db.filter(function(i) { return i.mode === 'all' || i.mode === curMode; });
+      var filteredCustom = customWardrobe.filter(function(i) { return i.mode === curMode; });
+      var allAvailable = filteredDb.concat(filteredCustom);
+
+      for(var i=0; i<allAvailable.length; i++) {
+        var item = allAvailable[i];
+        var pocket = curMode === 'trip' ? (item.pTrip || item.pMatch) : item.pMatch;
         var opt = document.createElement('option');
         opt.value = item.id;
-        opt.innerText = item.item + ' (' + pocket + ')';
+        opt.innerText = item.item + ' (' + (pocket || 'Plecak') + ')';
         sel.appendChild(opt);
       }
 
       var delBox = document.getElementById('wardrobeDeleteList');
       if(!delBox) return;
       delBox.innerHTML = '';
-      for(var j=0; j<filtered.length; j++) {
-        var item = filtered[j];
+      
+      // Lista do zarządzania całą szafą (bazowe + customowe)
+      for(var j=0; j<allAvailable.length; j++) {
+        var item2 = allAvailable[j];
         var div = document.createElement('div');
         div.className = "flex justify-between items-center text-[11px] text-slate-400 py-0.5";
-        var ruleTxt = (item.rule === 'custom' || item.rule === 'daily') ? ' [' + item.customVal + '/dzień]' : '';
-        div.innerHTML = '<span>' + item.item + ruleTxt + '</span><button type="button" onclick="permanentlyDeleteWardrobeItem(' + item.id + ')" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
+        var isCustom = item2.tag === 'szafa_custom';
+        div.innerHTML = '<span>' + item2.item + '</span>' +
+          '<button type="button" onclick="' + (isCustom ? 'permanentlyDeleteWardrobeItem(' + item2.id + ')' : 'deleteBuiltinItem(' + item2.id + ')') + '" class="text-red-400 font-bold px-1">usuń ze szafy</button>';
         delBox.appendChild(div);
       }
     }
@@ -606,8 +611,17 @@
       var val = sel.value;
       if(!val) return;
 
-      activeTripWardrobeIds[val] = true;
-      saveActiveTripWardrobe();
+      var parsedId = parseInt(val, 10);
+      // Sprawdzamy czy to przedmiot customowy czy z głównej bazy
+      var isCustom = customWardrobe.some(function(i) { return i.id === parsedId; });
+      if (isCustom) {
+        activeTripWardrobeIds[parsedId] = true;
+        saveActiveTripWardrobe();
+      } else {
+        // Jeśli dodano przedmiot z bazy domyślnej, a nie był widoczny, traktujemy go jako zaznaczony
+        activeTripWardrobeIds[parsedId] = true;
+        saveActiveTripWardrobe();
+      }
       sel.value = "";
       drawChecklist();
     }
@@ -631,8 +645,10 @@
 
     function deleteBuiltinItem(id) {
       db = db.filter(function(i) { return i.id !== id; });
+      delete activeTripWardrobeIds[id];
       delete checkedSet[id];
       saveDb();
+      populateWardrobeDropdown();
       drawChecklist();
     }
 
@@ -664,15 +680,19 @@
 
       for(var i=0; i<allCombinedItems.length; i++) {
         var it = allCombinedItems[i];
-        if(it.tag === 'szafa_custom') {
-          if(it.mode === curMode && activeTripWardrobeIds[it.id]) {
-            list.push(it);
+        if(it.tag === 'szafa_custom' || activeTripWardrobeIds[it.id]) {
+          if(it.mode === curMode || it.mode === 'all' || activeTripWardrobeIds[it.id]) {
+            if(it.mode === 'all' || it.mode === curMode || curMode === 'all') {
+              // Dodajemy
+            }
           }
-          continue;
         }
 
-        if(it.mode !== 'all' && it.mode !== curMode) continue;
+        var matchModeOK = (it.mode === 'all' || it.mode === curMode);
+        if(!matchModeOK && !activeTripWardrobeIds[it.id]) continue;
+
         if(it.tag === 'baza') { list.push(it); continue; }
+        if(activeTripWardrobeIds[it.id]) { list.push(it); continue; }
         
         if(it.tag === 'deszcz_lub_zimno') {
           if(myTags['deszcz'] || myTags['zimno']) list.push(it);
@@ -705,7 +725,7 @@
       var groups = {};
       for(var j=0; j<list.length; j++) {
         var item = list[j];
-        var pocket = curMode === 'trip' ? item.pTrip : item.pMatch;
+        var pocket = curMode === 'trip' ? (item.pTrip || item.pMatch) : item.pMatch;
         if(!groups[pocket]) groups[pocket] = [];
         groups[pocket].push(item);
       }
@@ -733,8 +753,8 @@
             lbl = o.item + ' (' + qty + ' szt.)';
           }
 
-          var deleteBtnHtml = (o.tag === "szafa_custom") ?
-            '<button type="button" onclick="removeFromChecklist(' + o.id + ')" class="text-slate-500 hover:text-amber-400 text-xs px-2 py-1 transition font-bold" title="Ukryj na ten wyjazd">✕</button>' :
+          var deleteBtnHtml = (o.tag === "szafa_custom" || activeTripWardrobeIds[o.id]) ?
+            '<button type="button" onclick="removeFromChecklist(' + o.id + ')" class="text-slate-500 hover:text-amber-400 text-xs px-2 py-1 transition font-bold" title="Ukryj">✕</button>' :
             '<button type="button" onclick="deleteBuiltinItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń z bazy">✕</button>';
 
           html += '<div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition">' +
