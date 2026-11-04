@@ -122,7 +122,12 @@
 
     <!-- Trip Settings -->
     <div id="tripSetupCard" class="glass rounded-2xl p-4 hidden">
-      <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Parametry Wyjazdu</h2>
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Parametry Wyjazdu</h2>
+        <div class="flex gap-2">
+          <button type="button" onclick="openBlockModal('trip')" class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-lg border border-emerald-500/40 font-semibold">➕ Nowy blok</button>
+        </div>
+      </div>
       <div class="flex justify-between items-center text-xs mb-3">
         <label class="text-slate-300">Liczba dni wyjazdu:</label>
         <div class="flex items-center gap-3">
@@ -131,12 +136,7 @@
           <button type="button" onclick="adjustDays(1)" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-white font-bold">+</button>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-2 text-xs mb-4">
-        <button type="button" onclick="clickTag('plazawoda')" id="tag-plazawoda" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">🏖️ Plaża / Woda</button>
-        <button type="button" onclick="clickTag('wieczor')" id="tag-wieczor" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">🔥 Chłodne wieczory</button>
-        <button type="button" onclick="clickTag('gory')" id="tag-gory" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">🏔️ Góry</button>
-        <button type="button" onclick="clickTag('jafowy')" id="tag-jafowy" class="p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400">📖 Jafowy</button>
-      </div>
+      <div id="tripBlocksContainer" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
       <div class="pt-2 border-t border-slate-800/80 flex justify-center">
         <button type="button" onclick="doResetTrip()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
       </div>
@@ -144,13 +144,13 @@
 
     <!-- Match Tag Selectors -->
     <div id="matchTagsCard" class="glass rounded-2xl p-4">
-      <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Warunki Meczowe</h2>
-      <div class="grid grid-cols-2 gap-2 text-xs mb-4">
-        <button type="button" onclick="clickTag('zimno')" id="tag-zimno" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">❄️ Zimno (<10°C)</button>
-        <button type="button" onclick="clickTag('deszcz')" id="tag-deszcz" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">🌧️ Deszcz / Mokro</button>
-        <button type="button" onclick="clickTag('ag')" id="tag-ag" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">🌱 Murawa Sztuczna</button>
-        <button type="button" onclick="clickTag('sg')" id="tag-sg" class="p-2.5 rounded-xl border text-left transition bg-slate-800 border-slate-700 text-slate-400">🌧️ Murawa Grząska</button>
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Warunki Meczowe</h2>
+        <div class="flex gap-2">
+          <button type="button" onclick="openBlockModal('match')" class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-lg border border-emerald-500/40 font-semibold">➕ Nowy blok</button>
+        </div>
       </div>
+      <div id="matchBlocksContainer" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
       <div class="pt-2 border-t border-slate-800/80 flex justify-center">
         <button type="button" onclick="doResetMatch()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
       </div>
@@ -219,6 +219,35 @@
     <div id="checklistContainer" class="space-y-4"></div>
   </main>
 
+  <!-- MODAL TWORZENIA BLOKU / TAGU -->
+  <div id="blockModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass bg-[#0b0f19] border border-slate-700 rounded-2xl p-5 w-full max-w-sm space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 id="modalTitle" class="text-sm font-bold text-emerald-400">Stwórz nowy blok tematyczny</h3>
+        <button type="button" onclick="closeBlockModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Nazwa bloku (z emoji):</label>
+          <input type="text" id="newBlockNameInput" placeholder="np. 🏊‍♂️ Basen / Siłownia" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Wybierz przedmioty ze Szafy przypisane do tego bloku:</label>
+          <div id="modalItemsChecklist" class="max-h-48 overflow-y-auto space-y-1.5 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+            <!-- Tutaj skrypt ładuje listę przedmiotów z bazy -->
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeBlockModal()" class="flex-1 py-2 bg-slate-800 text-slate-300 font-semibold rounded-xl hover:bg-slate-700 text-xs">Anuluj</button>
+        <button type="button" onclick="saveNewBlock()" class="flex-1 py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl hover:bg-emerald-400 text-xs">Zapisz blok</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     var curMode = 'match';
     var numDays = 3;
@@ -257,6 +286,34 @@
     var activeTripWardrobeIds = {};
     var myTags = { "baza": true, "fg": true };
     var checkedSet = {};
+    
+    // Dynamiczne bloki użytkownika
+    var customBlocks = {
+      trip: [
+        { id: 'plazawoda', name: '🏖️ Plaża / Woda' },
+        { id: 'wieczor', name: '🔥 Chłodne wieczory' },
+        { id: 'gory', name: '🏔️ Góry' },
+        { id: 'jafowy', name: '📖 Jafowy' }
+      ],
+      match: [
+        { id: 'zimno', name: '❄️ Zimno (<10°C)' },
+        { id: 'deszcz', name: '🌧️ Deszcz / Mokro' },
+        { id: 'ag', name: '🌱 Murawa Sztuczna' },
+        { id: 'sg', name: '🌧️ Murawa Grząska' }
+      ]
+    };
+    
+    // Powiązania przedmiotów z blokami customowymi: { blockId: [itemIds...] }
+    var blockItemMappings = {
+      'plazawoda': [103],
+      'wieczor': [104],
+      'gory': [106, 107],
+      'jafowy': [108, 109, 110],
+      'zimno': [5, 11, 12],
+      'deszcz': [13, 14]
+    };
+
+    var modalTargetMode = 'trip';
 
     function loadDb() {
       var saved = localStorage.getItem('packtactics_db');
@@ -286,6 +343,18 @@
 
     function saveActiveTripWardrobe() { localStorage.setItem('packtactics_active_wardrobe', JSON.stringify(activeTripWardrobeIds)); }
 
+    function loadCustomBlocksData() {
+      var savedB = localStorage.getItem('packtactics_custom_blocks');
+      if(savedB) { try { customBlocks = JSON.parse(savedB); } catch(e) {} }
+      var savedM = localStorage.getItem('packtactics_block_mappings');
+      if(savedM) { try { blockItemMappings = JSON.parse(savedM); } catch(e) {} }
+    }
+
+    function saveCustomBlocksData() {
+      localStorage.setItem('packtactics_custom_blocks', JSON.stringify(customBlocks));
+      localStorage.setItem('packtactics_block_mappings', JSON.stringify(blockItemMappings));
+    }
+
     function switchMode(m) {
       curMode = m;
       var bMatch = document.getElementById('btn-mode-match');
@@ -307,6 +376,7 @@
       if(rArea) rArea.style.display = m === 'trip' ? 'block' : 'none';
 
       populateWardrobeDropdown();
+      refreshTagUI();
       drawChecklist();
     }
 
@@ -325,25 +395,116 @@
       }
     }
 
-    function clickTag(t) {
-      if(t === 'ag' || t === 'sg') { delete myTags['fg']; delete myTags['ag']; delete myTags['sg']; }
-      if(myTags[t]) delete myTags[t];
-      else myTags[t] = true;
-      if(!myTags['ag'] && !myTags['sg']) myTags['fg'] = true;
+    function clickTag(blockId) {
+      if(curMode === 'match' && (blockId === 'ag' || blockId === 'sg')) { 
+        delete myTags['fg']; delete myTags['ag']; delete myTags['sg']; 
+      }
+      if(myTags[blockId]) delete myTags[blockId];
+      else myTags[blockId] = true;
+      
+      if(curMode === 'match' && !myTags['ag'] && !myTags['sg']) myTags['fg'] = true;
       
       refreshTagUI();
       drawChecklist();
     }
 
     function refreshTagUI() {
-      var arr = ['zimno', 'deszcz', 'ag', 'sg', 'plazawoda', 'wieczor', 'gory', 'jafowy'];
-      for(var i=0; i<arr.length; i++) {
-        var el = document.getElementById('tag-' + arr[i]);
-        if(el) {
-          if(myTags[arr[i]]) el.className = "p-2.5 rounded-xl border text-left bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold";
-          else el.className = "p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400";
+      // Renderowanie bloków dla wyjazdu
+      var tripContainer = document.getElementById('tripBlocksContainer');
+      if(tripContainer) {
+        tripContainer.innerHTML = '';
+        var tBlocks = customBlocks.trip || [];
+        for(var i=0; i<tBlocks.length; i++) {
+          var b = tBlocks[i];
+          var isActive = !!myTags[b.id];
+          var cls = isActive ? "p-2.5 rounded-xl border text-left bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold flex justify-between items-center" : "p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400 flex justify-between items-center";
+          
+          var div = document.createElement('div');
+          div.className = cls;
+          div.innerHTML = '<span onclick="clickTag(\'' + b.id + '\')" class="flex-1 cursor-pointer">' + b.name + '</span>' +
+                          '<button type="button" onclick="deleteCustomBlock(\'trip\', \'' + b.id + '\')" class="text-slate-500 hover:text-red-400 px-1 text-[10px]" title="Usuń blok">✕</button>';
+          tripContainer.appendChild(div);
         }
       }
+
+      // Renderowanie bloków dla meczu
+      var matchContainer = document.getElementById('matchBlocksContainer');
+      if(matchContainer) {
+        matchContainer.innerHTML = '';
+        var mBlocks = customBlocks.match || [];
+        for(var j=0; j<mBlocks.length; j++) {
+          var bm = mBlocks[j];
+          var isActiveM = !!myTags[bm.id];
+          var clsM = isActiveM ? "p-2.5 rounded-xl border text-left bg-emerald-500/10 border-emerald-500/50 text-emerald-400 font-semibold flex justify-between items-center" : "p-2.5 rounded-xl border text-left bg-slate-800 border-slate-700 text-slate-400 flex justify-between items-center";
+          
+          var divM = document.createElement('div');
+          divM.className = clsM;
+          divM.innerHTML = '<span onclick="clickTag(\'' + bm.id + '\')" class="flex-1 cursor-pointer">' + bm.name + '</span>' +
+                           '<button type="button" onclick="deleteCustomBlock(\'match\', \'' + bm.id + '\')" class="text-slate-500 hover:text-red-400 px-1 text-[10px]" title="Usuń blok">✕</button>';
+          matchContainer.appendChild(divM);
+        }
+      }
+    }
+
+    function openBlockModal(mode) {
+      modalTargetMode = mode;
+      var modal = document.getElementById('blockModal');
+      var nameInp = document.getElementById('newBlockNameInput');
+      if(nameInp) nameInp.value = '';
+      
+      var itemsBox = document.getElementById('modalItemsChecklist');
+      if(itemsBox) {
+        itemsBox.innerHTML = '';
+        var allItems = db.concat(customWardrobe);
+        for(var i=0; i<allItems.length; i++) {
+          var it = allItems[i];
+          var row = document.createElement('label');
+          row.className = "flex items-center gap-2 cursor-pointer text-slate-300 text-xs py-1 px-1 hover:bg-slate-800/60 rounded";
+          row.innerHTML = '<input type="checkbox" value="' + it.id + '" class="blockModalItemCheckbox w-3.5 h-3.5 rounded border-slate-700 text-emerald-500 bg-slate-950"><span>' + it.item + '</span>';
+          itemsBox.appendChild(row);
+        }
+      }
+      if(modal) modal.classList.remove('hidden');
+    }
+
+    function closeBlockModal() {
+      var modal = document.getElementById('blockModal');
+      if(modal) modal.classList.add('hidden');
+    }
+
+    function saveNewBlock() {
+      var nameInp = document.getElementById('newBlockNameInput');
+      if(!nameInp || !nameInp.value.trim()) return;
+      var blockName = nameInp.value.trim();
+      var blockId = 'block_' + Date.now();
+
+      var checkboxes = document.querySelectorAll('.blockModalItemCheckbox');
+      var selectedItemIds = [];
+      for(var i=0; i<checkboxes.length; i++) {
+        if(checkboxes[i].checked) {
+          selectedItemIds.push(parseInt(checkboxes[i].value, 10));
+        }
+      }
+
+      if(!customBlocks[modalTargetMode]) customBlocks[modalTargetMode] = [];
+      customBlocks[modalTargetMode].push({ id: blockId, name: blockName });
+      blockItemMappings[blockId] = selectedItemIds;
+
+      saveCustomBlocksData();
+      closeBlockModal();
+      refreshTagUI();
+      drawChecklist();
+    }
+
+    function deleteCustomBlock(mode, blockId) {
+      if(!confirm("Czy na pewno chcesz usunąć ten blok tematyczny?")) return;
+      customBlocks[mode] = customBlocks[mode].filter(function(b) { return b.id !== blockId; });
+      delete blockItemMappings[blockId];
+      delete myTags[blockId];
+
+      saveCustomBlocksData();
+      refreshTagUI();
+      drawChecklist();
     }
 
     function adjustDays(d) {
@@ -354,9 +515,7 @@
     }
 
     function doResetMatch() {
-      delete myTags['zimno']; delete myTags['deszcz']; delete myTags['ag']; delete myTags['sg'];
-      myTags['fg'] = true; myTags['baza'] = true;
-
+      myTags = { "baza": true, "fg": true };
       var iL = document.getElementById('inputLeave');
       var iG = document.getElementById('inputGath');
       var iM = document.getElementById('inputMatch');
@@ -378,8 +537,7 @@
       var dCount = document.getElementById('daysCount');
       if(dCount) dCount.innerText = numDays;
 
-      delete myTags['plazawoda']; delete myTags['wieczor']; delete myTags['gory']; delete myTags['jafowy'];
-
+      myTags = { "baza": true, "fg": true };
       checkedSet = {};
 
       refreshTagUI();
@@ -498,23 +656,45 @@
       box.innerHTML = '';
 
       var list = [];
-      for(var i=0; i<db.length; i++) {
-        var it = db[i];
+      var allCombinedItems = db.concat(customWardrobe);
+
+      for(var i=0; i<allCombinedItems.length; i++) {
+        var it = allCombinedItems[i];
+        if(it.tag === 'szafa_custom') {
+          if(it.mode === curMode && activeTripWardrobeIds[it.id]) {
+            list.push(it);
+          }
+          continue;
+        }
+
         if(it.mode !== 'all' && it.mode !== curMode) continue;
         if(it.tag === 'baza') { list.push(it); continue; }
+        
         if(it.tag === 'deszcz_lub_zimno') {
           if(myTags['deszcz'] || myTags['zimno']) list.push(it);
           continue;
         }
+
         if(myTags[it.tag] || (curMode === 'trip' && it.tag === 'wyjazd_multi')) {
           list.push(it);
+          continue;
         }
-      }
 
-      for(var c=0; c<customWardrobe.length; c++) {
-        var cItem = customWardrobe[c];
-        if(cItem.mode === curMode && activeTripWardrobeIds[cItem.id]) {
-          list.push(cItem);
+        // Sprawdzanie dynamicznych powiązań bloków użytkownika
+        var addedViaCustomBlock = false;
+        var blockKeys = Object.keys(blockItemMappings);
+        for(var bk=0; bk<blockKeys.length; bk++) {
+          var bId = blockKeys[bk];
+          if(myTags[bId]) {
+            var itemsInBlock = blockItemMappings[bId] || [];
+            if(itemsInBlock.includes(it.id)) {
+              addedViaCustomBlock = true;
+              break;
+            }
+          }
+        }
+        if(addedViaCustomBlock) {
+          list.push(it);
         }
       }
 
@@ -577,7 +757,6 @@
     function calcTimers() {
       var now = new Date();
       
-      // 1. Aktualizacja zegara w stylu Apple Liquid Glass Lockscreen
       var timeStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
       var weekdayShort = now.toLocaleDateString('pl-PL', { weekday: 'short' });
       var dayNum = now.getDate();
@@ -589,7 +768,6 @@
       if(appleClockTimeEl) appleClockTimeEl.innerText = timeStr;
       if(appleClockDateEl) appleClockDateEl.innerText = dateStr;
 
-      // 2. Sprawdzenie czy użytkownik podał choć jedną godzinę
       var iL = document.getElementById('inputLeave');
       var iG = document.getElementById('inputGath');
       var iM = document.getElementById('inputMatch');
@@ -608,7 +786,6 @@
         if(timersBox) timersBox.classList.remove('hidden');
       }
 
-      // 3. Obliczanie odliczania timerów
       var isTomorrow = document.getElementById('chkTomorrow') ? document.getElementById('chkTomorrow').checked : false;
 
       var arr = ['Leave', 'Gath', 'Match'];
@@ -670,6 +847,7 @@
       db = loadDb();
       customWardrobe = loadWardrobe();
       activeTripWardrobeIds = loadActiveTripWardrobe();
+      loadCustomBlocksData();
 
       toggleCustomRatioInput();
       refreshTagUI();
