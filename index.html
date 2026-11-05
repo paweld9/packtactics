@@ -881,7 +881,7 @@
         if(timersBox) timersBox.classList.remove('hidden');
       }
 
-      var isTomorrow = document.getElementById('chkTomorrow') ? document.getElementById('chkTomorrow'].checked : false;
+      var isTomorrow = document.getElementById('chkTomorrow') ? document.getElementById('chkTomorrow').checked : false;
 
       var arr = ['Leave', 'Gath', 'Match'];
       for(var i=0; i<arr.length; i++) {
@@ -922,15 +922,6 @@
           txt = (isPast && !isTomorrow ? '-' : '') + formattedHrs + 'h ' + formattedMins + 'm';
         }
 
-    // Rejestracja Service Workera dla trybu offline
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('./sw.js').catch(function(err) {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-      });
-    }
-
         displayEl.innerText = txt;
 
         if (isPast && !isTomorrow) {
@@ -958,6 +949,13 @@
       drawChecklist();
       calcTimers();
       setInterval(calcTimers, 1000);
+
+      // Rejestracja Service Workera dla trybu offline
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      }
     });
   </script>
 </body>
