@@ -143,8 +143,13 @@
         </div>
       </div>
       <div id="tripBlocksContainer" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
-      <div class="pt-2 border-t border-slate-800/80 flex justify-center">
-        <button type="button" onclick="doResetTrip()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
+      
+      <!-- Przycisk zapisu szablonu wyjazdu -->
+      <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
+        <button type="button" onclick="openSavePresetModal('trip')" class="w-full py-2 rounded-xl border border-emerald-500/50 bg-transparent text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 transition flex items-center justify-center gap-2">
+          💾 Zapisz bieżące ustawienia
+        </button>
+        <button type="button" onclick="doResetTrip()" class="w-fit mx-auto px-4 py-1 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
       </div>
     </div>
 
@@ -160,8 +165,21 @@
         </div>
       </div>
       <div id="matchBlocksContainer" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
-      <div class="pt-2 border-t border-slate-800/80 flex justify-center">
-        <button type="button" onclick="doResetMatch()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
+      
+      <!-- Przycisk zapisu szablonu meczu -->
+      <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
+        <button type="button" onclick="openSavePresetModal('match')" class="w-full py-2 rounded-xl border border-emerald-500/50 bg-transparent text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 transition flex items-center justify-center gap-2">
+          💾 Zapisz bieżące ustawienia
+        </button>
+        <button type="button" onclick="doResetMatch()" class="w-fit mx-auto px-4 py-1 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
+      </div>
+    </div>
+
+    <!-- Sekcja: Moje Mecze / Moje Wyjazdy (Dynamiczna w zależności od trybu) -->
+    <div class="glass rounded-2xl p-4 space-y-3">
+      <h2 id="presetsSectionTitle" class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">Moje Mecze</h2>
+      <div id="presetsContainer" class="space-y-2">
+        <!-- Tutaj generują się zapisane szablony -->
       </div>
     </div>
 
@@ -257,6 +275,28 @@
     </div>
   </div>
 
+  <!-- MODAL ZAPISU SZABLONU (PRESETU) -->
+  <div id="savePresetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass bg-[#0b0f19] border border-slate-700 rounded-2xl p-5 w-full max-w-sm space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="text-sm font-bold text-emerald-400">Zapisz bieżące ustawienia</h3>
+        <button type="button" onclick="closeSavePresetModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Nazwa szablonu (np. Mazurski wypad, Mecz ligowy):</label>
+          <input type="text" id="presetNameInput" placeholder="Wpisz nazwę..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeSavePresetModal()" class="flex-1 py-2 bg-slate-800 text-slate-300 font-semibold rounded-xl hover:bg-slate-700 text-xs">Anuluj</button>
+        <button type="button" onclick="confirmSavePreset()" class="flex-1 py-2 bg-emerald-500 text-slate-950 font-bold rounded-xl hover:bg-emerald-400 text-xs">Zapisz</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     var curMode = 'match';
     var numDays = 3;
@@ -323,9 +363,15 @@
       'deszcz': [13, 14]
     };
 
+    var savedPresets = {
+      match: [],
+      trip: []
+    };
+
     var modalTargetMode = 'trip';
     var editingBlockId = null;
     var isEditModeActive = { trip: false, match: false };
+    var presetTargetMode = 'match';
 
     function loadDatabases() {
       var savedMatch = localStorage.getItem('packtactics_match_db');
@@ -333,11 +379,20 @@
 
       var savedTrip = localStorage.getItem('packtactics_trip_db');
       tripDb = savedTrip ? JSON.parse(savedTrip) : defaultTripDb;
+
+      var sPresets = localStorage.getItem('packtactics_presets');
+      if(sPresets) {
+        try { savedPresets = JSON.parse(sPresets); } catch(e) {}
+      }
     }
 
     function saveDatabases() {
       localStorage.setItem('packtactics_match_db', JSON.stringify(matchDb));
       localStorage.setItem('packtactics_trip_db', JSON.stringify(tripDb));
+    }
+
+    function savePresetsData() {
+      localStorage.setItem('packtactics_presets', JSON.stringify(savedPresets));
     }
 
     function loadActiveTripWardrobe() {
@@ -372,15 +427,18 @@
       var mTags = document.getElementById('matchTagsCard');
       var tSetup = document.getElementById('tripSetupCard');
       var rArea = document.getElementById('ratioSetupArea');
+      var pTitle = document.getElementById('presetsSectionTitle');
 
       if(cCard) cCard.style.display = m === 'match' ? 'block' : 'none';
       if(tDetails) tDetails.style.display = m === 'match' ? 'block' : 'none';
       if(mTags) mTags.style.display = m === 'match' ? 'block' : 'none';
       if(tSetup) tSetup.style.display = m === 'trip' ? 'block' : 'none';
       if(rArea) rArea.style.display = m === 'trip' ? 'block' : 'none';
+      if(pTitle) pTitle.innerText = m === 'match' ? 'Moje Mecze' : 'Moje Wyjazdy';
 
       populateWardrobeDropdown();
       refreshTagUI();
+      renderPresets();
       drawChecklist();
     }
 
@@ -480,6 +538,95 @@
                            '<button type="button" onclick="deleteCustomBlock(\'match\', \'' + bm.id + '\', event)" class="text-slate-500 hover:text-red-400 px-1.5 py-0.5 text-[11px]" title="Usuń blok">✕</button>';
           matchContainer.appendChild(divM);
         }
+      }
+    }
+
+    // --- ZARZĄDZANIE SZABLONAMI (PRESETAMI) ---
+    function openSavePresetModal(mode) {
+      presetTargetMode = mode;
+      var nameInp = document.getElementById('presetNameInput');
+      if(nameInp) nameInp.value = '';
+      var modal = document.getElementById('savePresetModal');
+      if(modal) modal.classList.remove('hidden');
+    }
+
+    function closeSavePresetModal() {
+      var modal = document.getElementById('savePresetModal');
+      if(modal) modal.classList.add('hidden');
+    }
+
+    function confirmSavePreset() {
+      var nameInp = document.getElementById('presetNameInput');
+      if(!nameInp || !nameInp.value.trim()) return;
+      var presetName = nameInp.value.trim();
+
+      var presetData = {
+        id: 'preset_' + Date.now(),
+        name: presetName,
+        tags: JSON.parse(JSON.stringify(myTags)),
+        numDays: numDays,
+        activeWardrobeIds: JSON.parse(JSON.stringify(activeTripWardrobeIds))
+      };
+
+      if(!savedPresets[presetTargetMode]) savedPresets[presetTargetMode] = [];
+      savedPresets[presetTargetMode].push(presetData);
+      savePresetsData();
+      closeSavePresetModal();
+      renderPresets();
+    }
+
+    function loadPreset(mode, presetId) {
+      var list = savedPresets[mode] || [];
+      var target = null;
+      for(var i=0; i<list.length; i++) {
+        if(list[i].id === presetId) {
+          target = list[i];
+          break;
+        }
+      }
+      if(!target) return;
+
+      myTags = JSON.parse(JSON.stringify(target.tags));
+      if(target.numDays) {
+        numDays = target.numDays;
+        var dCount = document.getElementById('daysCount');
+        if(dCount) dCount.innerText = numDays;
+      }
+      if(target.activeWardrobeIds) {
+        activeTripWardrobeIds = JSON.parse(JSON.stringify(target.activeWardrobeIds));
+        saveActiveTripWardrobe();
+      }
+
+      refreshTagUI();
+      drawChecklist();
+    }
+
+    function deletePreset(mode, presetId, event) {
+      event.stopPropagation();
+      if(!confirm("Czy na pewno chcesz usunąć ten szablon?")) return;
+      savedPresets[mode] = (savedPresets[mode] || []).filter(function(p) { return p.id !== presetId; });
+      savePresetsData();
+      renderPresets();
+    }
+
+    function renderPresets() {
+      var container = document.getElementById('presetsContainer');
+      if(!container) return;
+      container.innerHTML = '';
+
+      var list = savedPresets[curMode] || [];
+      if(list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 italic py-1">Brak zapisanych szablonów. Skonfiguruj ustawienia powyżej i kliknij „Zapisz bieżące ustawienia”.</p>';
+        return;
+      }
+
+      for(var i=0; i<list.length; i++) {
+        var p = list[i];
+        var div = document.createElement('div');
+        div.className = "flex justify-between items-center p-2.5 bg-slate-900/80 border border-slate-800 rounded-xl cursor-pointer hover:border-emerald-500/50 transition";
+        div.innerHTML = '<span onclick="loadPreset(\'' + curMode + '\', \'' + p.id + '\')" class="text-xs text-slate-200 font-semibold flex-1">' + p.name + '</span>' +
+                        '<button type="button" onclick="deletePreset(\'' + curMode + '\', \'' + p.id + '\', event)" class="text-slate-500 hover:text-red-400 px-2 py-0.5 text-xs font-bold" title="Usuń szablon">✕</button>';
+        container.appendChild(div);
       }
     }
 
@@ -945,6 +1092,7 @@
 
       toggleCustomRatioInput();
       refreshTagUI();
+      renderPresets();
       populateWardrobeDropdown();
       drawChecklist();
       calcTimers();
