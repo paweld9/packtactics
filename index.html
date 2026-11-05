@@ -13,6 +13,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- Link do manifestu PWA (tryb offline) -->
+  <link rel="manifest" href="./manifest.json">
+
   <!-- Ikona aplikacji dla iOS i Androida -->
   <link rel="apple-touch-icon" href="./icon.png">
   <link rel="icon" type="image/png" href="./icon.png">
@@ -878,7 +881,7 @@
         if(timersBox) timersBox.classList.remove('hidden');
       }
 
-      var isTomorrow = document.getElementById('chkTomorrow') ? document.getElementById('chkTomorrow').checked : false;
+      var isTomorrow = document.getElementById('chkTomorrow') ? document.getElementById('chkTomorrow'].checked : false;
 
       var arr = ['Leave', 'Gath', 'Match'];
       for(var i=0; i<arr.length; i++) {
@@ -918,6 +921,15 @@
         } else {
           txt = (isPast && !isTomorrow ? '-' : '') + formattedHrs + 'h ' + formattedMins + 'm';
         }
+
+    // Rejestracja Service Workera dla trybu offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').catch(function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
 
         displayEl.innerText = txt;
 
