@@ -144,12 +144,10 @@
       </div>
       <div id="tripBlocksContainer" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
       
-      <!-- Przycisk zapisu szablonu wyjazdu -->
-      <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
-        <button type="button" onclick="openSavePresetModal('trip')" class="w-full py-2 rounded-xl border border-emerald-500/50 bg-transparent text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 transition flex items-center justify-center gap-2">
-          💾 Zapisz bieżące ustawienia
-        </button>
-        <button type="button" onclick="doResetTrip()" class="w-fit mx-auto px-4 py-1 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
+      <!-- Przyciski akcji (styl resetowania) -->
+      <div class="pt-2 border-t border-slate-800/80 flex justify-center gap-3">
+        <button type="button" onclick="openSavePresetModal('trip')" class="w-fit px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-transparent text-emerald-400 text-xs font-medium hover:bg-emerald-500/10 transition">Zapisz ustawienia</button>
+        <button type="button" onclick="doResetTrip()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
       </div>
     </div>
 
@@ -166,22 +164,22 @@
       </div>
       <div id="matchBlocksContainer" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
       
-      <!-- Przycisk zapisu szablonu meczu -->
-      <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
-        <button type="button" onclick="openSavePresetModal('match')" class="w-full py-2 rounded-xl border border-emerald-500/50 bg-transparent text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 transition flex items-center justify-center gap-2">
-          💾 Zapisz bieżące ustawienia
-        </button>
-        <button type="button" onclick="doResetMatch()" class="w-fit mx-auto px-4 py-1 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
+      <!-- Przyciski akcji (styl resetowania) -->
+      <div class="pt-2 border-t border-slate-800/80 flex justify-center gap-3">
+        <button type="button" onclick="openSavePresetModal('match')" class="w-fit px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-transparent text-emerald-400 text-xs font-medium hover:bg-emerald-500/10 transition">Zapisz ustawienia</button>
+        <button type="button" onclick="doResetMatch()" class="w-fit px-4 py-1.5 rounded-xl border border-red-500/50 bg-transparent text-red-400 text-xs font-medium hover:bg-red-500/10 transition">Resetuj ustawienia</button>
       </div>
     </div>
 
-    <!-- Sekcja: Moje Mecze / Moje Wyjazdy (Dynamiczna w zależności od trybu) -->
-    <div class="glass rounded-2xl p-4 space-y-3">
-      <h2 id="presetsSectionTitle" class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">Moje Mecze</h2>
-      <div id="presetsContainer" class="space-y-2">
+    <!-- Sekcja: Moje Mecze / Moje Wyjazdy jako zwijany Bloczek (Details) -->
+    <details id="presetsDetailsCard" class="glass rounded-2xl p-4 cursor-pointer">
+      <summary id="presetsSectionTitle" class="text-sm font-semibold text-slate-200 flex justify-between items-center">
+        📂 Moje Mecze
+      </summary>
+      <div id="presetsContainer" class="mt-3 space-y-2 pt-3 border-t border-slate-800 text-xs">
         <!-- Tutaj generują się zapisane szablony -->
       </div>
-    </div>
+    </details>
 
     <!-- Dodawanie z Szafy via Dropdown -->
     <div class="glass rounded-2xl p-4 space-y-3">
@@ -434,7 +432,7 @@
       if(mTags) mTags.style.display = m === 'match' ? 'block' : 'none';
       if(tSetup) tSetup.style.display = m === 'trip' ? 'block' : 'none';
       if(rArea) rArea.style.display = m === 'trip' ? 'block' : 'none';
-      if(pTitle) pTitle.innerText = m === 'match' ? 'Moje Mecze' : 'Moje Wyjazdy';
+      if(pTitle) pTitle.innerHTML = m === 'match' ? '📂 Moje Mecze' : '📂 Moje Wyjazdy';
 
       populateWardrobeDropdown();
       refreshTagUI();
@@ -616,7 +614,7 @@
 
       var list = savedPresets[curMode] || [];
       if(list.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500 italic py-1">Brak zapisanych szablonów. Skonfiguruj ustawienia powyżej i kliknij „Zapisz bieżące ustawienia”.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-500 italic py-1">Brak zapisanych szablonów. Kliknij „Zapisz ustawienia” powyżej.</p>';
         return;
       }
 
