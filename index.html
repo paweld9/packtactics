@@ -137,10 +137,12 @@
       <div class="flex justify-between items-center mb-3">
         <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Parametry Wyjazdu</h2>
         <div class="flex gap-2 items-center">
-          <!-- Przycisk Claude AI z logo/ikoną -->
-          <button type="button" onclick="openClaudeModal()" class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-lg border border-amber-500/40 font-semibold flex items-center gap-1 hover:bg-amber-500/30 transition" title="Zapytaj Claude AI">
-            <svg class="w-3.5 h-3.5 inline-block" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-            <span>Claude AI</span>
+          <!-- Przycisk z ikoną kleksa / gwiazdki -->
+          <button type="button" onclick="openClaudeModal()" class="text-xs bg-[#c86d51]/20 text-[#e08365] px-2 py-0.5 rounded-lg border border-[#c86d51]/40 font-semibold flex items-center gap-1.5 hover:bg-[#c86d51]/30 transition" title="Zapytaj AI">
+            <svg class="w-3.5 h-3.5 inline-block text-[#df8264]" viewBox="0 0 512 512" fill="currentColor">
+              <path d="M256 32l32 96 96 32-96 32-32 96-32-96-96-32 96-32 32-96zm128 160l20 60 60 20-60 20-20 60-20-60-60-20 60-20 20-60zM128 320l16 48 48 16-48 16-16 48-16-48-48-16 48-16 16-48z"/>
+            </svg>
+            <span>AI Asystent</span>
           </button>
           <button type="button" id="btnEditModeTrip" onclick="toggleEditMode('trip')" class="text-slate-500 hover:text-slate-300 p-1 transition" title="Tryb edycji bloku">
             <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
@@ -258,15 +260,15 @@
     <div id="checklistContainer" class="space-y-4"></div>
   </main>
 
-  <!-- MODAL WYSUWANY OD DOŁU: CLAUDE AI CHAT -->
+  <!-- MODAL WYSUWANY OD DOŁU: AI ASYSTENT -->
   <div id="claudeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col justify-end">
     <div class="glass bg-[#0b0f19] border-t border-slate-700 rounded-t-3xl p-5 w-full max-w-md mx-auto h-[55vh] flex flex-col shadow-2xl animate-slide-up">
       
       <!-- Nagłówek modalu -->
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xs font-bold">✨</div>
-          <h3 class="text-sm font-bold text-slate-100">Claude AI – Asystent Wyjazdu</h3>
+          <div class="w-6 h-6 rounded-full bg-[#c86d51]/20 border border-[#c86d51]/40 flex items-center justify-center text-[#e08365] text-xs font-bold">✨</div>
+          <h3 class="text-sm font-bold text-slate-100">AI Asystent Wyjazdu</h3>
         </div>
         <button type="button" onclick="closeClaudeModal()" class="text-slate-400 hover:text-white font-bold text-sm p-1">✕</button>
       </div>
@@ -280,8 +282,8 @@
 
       <!-- Pasek wpisywania wiadomości -->
       <div class="pt-2 border-t border-slate-800 flex gap-2">
-        <input type="text" id="claudeInput" placeholder="Napisz np. wypad w góry na weekend..." onkeydown="if(event.key==='Enter') sendToClaudeAI()" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-500">
-        <button type="button" onclick="sendToClaudeAI()" class="bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-xl hover:bg-amber-400 text-xs transition">Wyślij</button>
+        <input type="text" id="claudeInput" placeholder="Napisz np. wypad w góry na weekend..." onkeydown="if(event.key==='Enter') sendToClaudeAI()" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-[#c86d51]">
+        <button type="button" onclick="sendToClaudeAI()" class="bg-[#c86d51] text-slate-950 font-bold px-4 py-2 rounded-xl hover:bg-[#b85d41] text-xs transition">Wyślij</button>
       </div>
 
     </div>
@@ -616,7 +618,7 @@
       }
     }
 
-    // --- FUNKCJE OBSŁUGI CZATU CLAUDE AI ---
+    // --- FUNKCJE OBSŁUGI CZATU AI ---
     function openClaudeModal() {
       var modal = document.getElementById('claudeModal');
       if(modal) modal.classList.remove('hidden');
@@ -637,34 +639,29 @@
 
       var chatBox = document.getElementById('claudeChatMessages');
       
-      // Dodaj wiadomość użytkownika
       var userMsg = document.createElement('div');
-      userMsg.className = "bg-amber-500/10 border border-amber-500/30 p-3 rounded-2xl text-slate-200 ml-6 text-right";
+      userMsg.className = "bg-[#c86d51]/10 border border-[#c86d51]/30 p-3 rounded-2xl text-slate-200 ml-6 text-right";
       userMsg.innerText = userText;
       chatBox.appendChild(userMsg);
       chatBox.scrollTop = chatBox.scrollHeight;
 
-      // Dodaj tymczasową odpowiedź "Myślę..."
       var loadingMsg = document.createElement('div');
       loadingMsg.id = 'claudeLoading';
       loadingMsg.className = "bg-slate-900/90 p-3 rounded-2xl border border-slate-800 text-slate-400 italic";
-      loadingMsg.innerText = "Claude analizuje wyjazd...";
+      loadingMsg.innerText = "Asystent analizuje wyjazd...";
       chatBox.appendChild(loadingMsg);
       chatBox.scrollTop = chatBox.scrollHeight;
 
-      // Symulacja / Wywołanie API Claude
       setTimeout(function() {
         var loader = document.getElementById('claudeLoading');
         if(loader) loader.remove();
 
-        // Przykładowa inteligentna reakcja i automatyczne ustawienie parametrów
         var aiMsg = document.createElement('div');
         aiMsg.className = "bg-slate-900/90 p-3 rounded-2xl border border-slate-800 text-slate-300";
-        aiMsg.innerHTML = "Przeanalizowałem opis! Ustawiam wyjazd na <b class='text-amber-400'>4 dni</b> i aktywuję blok <b class='text-amber-400'>🏖️ Plaża / Woda</b> oraz <b class='text-amber-400'>🔥 Chłodne wieczory</b>.";
+        aiMsg.innerHTML = "Przeanalizowałem opis! Ustawiam wyjazd na <b class='text-[#e08365]'>4 dni</b> i aktywuję blok <b class='text-[#e08365]'>🏖️ Plaża / Woda</b> oraz <b class='text-[#e08365]'>🔥 Chłodne wieczory</b>.";
         chatBox.appendChild(aiMsg);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        // Automatyczne dostosowanie stanu aplikacji na podstawie AI
         numDays = 4;
         localStorage.setItem('packtactics_trip_days', numDays);
         var dCount = document.getElementById('daysCount');
@@ -678,7 +675,6 @@
         drawChecklist();
       }, 1200);
     }
-    // -------------------------------------
 
     function openSavePresetModal(mode) {
       presetTargetMode = mode;
