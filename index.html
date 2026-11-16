@@ -137,7 +137,6 @@
       <div class="flex justify-between items-center mb-3">
         <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Parametry Wyjazdu</h2>
         <div class="flex gap-2 items-center">
-          <!-- Przycisk Tekst AI z tą samą ikoną i kolorem -->
           <button type="button" onclick="openClaudeModal()" class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-lg border border-amber-500/40 font-semibold flex items-center gap-1 hover:bg-amber-500/30 transition" title="Wklej tekst od AI">
             <svg class="w-3.5 h-3.5 inline-block" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             <span>Tekst AI</span>
@@ -273,7 +272,7 @@
 
       <!-- Instrukcja -->
       <p class="text-[11px] text-slate-400">
-        Wklej tutaj treść wygenerowaną przez AI (np. listę przedmiotów lub strukturę JSON). Aplikacja automatycznie utworzy z niej checklistę!
+        Wklej tutaj treść wygenerowaną przez AI. Aplikacja pominie nagłówki z liczbą dni i wygeneruje czystą checklistę!
       </p>
 
       <!-- Pole tekstowe do wklejenia -->
@@ -377,6 +376,7 @@
     var matchDb = [];
     var tripDb = [];
     var activeTripWardrobeIds = {};
+    var aiImportedItems = []; // Przechowuje przedmioty zaimportowane z tekstu AI (oddzielnie od Szafy)
     var myTags = { "baza": true, "fg": true };
     var checkedSet = {};
     
@@ -421,6 +421,11 @@
       var savedTrip = localStorage.getItem('packtactics_trip_db');
       tripDb = savedTrip ? JSON.parse(savedTrip) : defaultTripDb;
 
+      var sAiItems = localStorage.getItem('packtactics_ai_imported_items');
+      if(sAiItems) {
+        try { aiImportedItems = JSON.parse(sAiItems); } catch(e) {}
+      }
+
       var sPresets = localStorage.getItem('packtactics_presets');
       if(sPresets) {
         try { savedPresets = JSON.parse(sPresets); } catch(e) {}
@@ -463,6 +468,10 @@
     function saveDatabases() {
       localStorage.setItem('packtactics_match_db', JSON.stringify(matchDb));
       localStorage.setItem('packtactics_trip_db', JSON.stringify(tripDb));
+    }
+
+    function saveAiImportedItems() {
+      localStorage.setItem('packtactics_ai_imported_items', JSON.stringify(aiImportedItems));
     }
 
     function savePresetsData() {
@@ -616,7 +625,7 @@
       }
     }
 
-    // --- FUNKCJE OBSŁUGI MODALU TEKSTU AI (PARSOWANIE WKLEJONEGO TEKSTU) ---
+    // --- FUNKCJE OBSŁUGI MODALU TEKSTU AI (INTELIGENTNY PARSER BEZ ŚMIECENIA W SZAFIE) ---
     function openClaudeModal() {
       var modal = document.getElementById('claudeModal');
       if(modal) modal.classList.remove('hidden');
@@ -635,7 +644,6 @@
       var rawText = input.value.trim();
 
       try {
-        // Próba parsowania jako JSON (np. jeśli AI zwróciło strukturę jak w promptach / template'ach)
         var cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
         var parsed = JSON.parse(cleanJson);
 
@@ -646,63 +654,116 @@
           if(dCount) dCount.innerText = numDays;
         }
 
-        // Obsługa formatu z polami "items"
         var itemsList = parsed.items || parsed;
         if (Array.isArray(itemsList)) {
           for (var i = 0; i < itemsList.length; i++) {
             var newItem = itemsList[i];
-            var itemObj = {
-              id: Date.now() + i,
-              item: newItem.label || newItem.item || newItem.name || "Przedmiot AI",
-              pTrip: newItem.category || newItem.pocket || "Ubrania Wyjazdowe",
-              tag: "ai_import",
-              mode: "trip"
-            };
-            tripDb.push(itemObj);
-            activeTripWardrobeIds[itemObj.id] = true;
+            var itemName = newItem.label || newItem.item || newItem.name;
+            if (itemName) {
+              aiImportedItems.push({
+                id: Date.now() + i,
+                item: itemName,
+                pTrip: newItem.category || newItem.pocket || "Akcesoria Wyjazdowe"
+              });
+            }
           }
-          saveDatabases();
-          saveActiveTripWardrobe();
+          saveAiImportedItems();
         }
 
         closeClaudeModal();
-        populateWardrobeDropdown();
         drawChecklist();
-        alert("Pomyślnie wygenerowano checklistę z JSON-a AI!");
+        alert("Pomyślnie zaimportowano listę od AI!");
         return;
 
       } catch (e) {
-        // Jeśli to zwykły tekst (wypisane linijki, myślniki, punktor), rozbijamy po linijkach
+        // Inteligentny parser tekstu (pomija nagłówki z liczbą dni typu "na 5 dni")
         var lines = rawText.split('\n');
         var addedCount = 0;
 
         for (var j = 0; j < lines.length; j++) {
-          var line = lines[j].replace(/^[-*•\d+.]\s*/, '').trim();
-          if (line.length > 2) {
-            var itemObj2 = {
+          var line = lines[j].trim();
+          if (!line) continue;
+
+          // Sprawdzamy czy linijka to nagłówek o dniach (np. "Lista rzeczy na 5 dni:")
+          var lower = line.toLowerCase();
+          if (lower.includes('dni') && (lower.includes('na') || lower.includes('wyjazd') || lower.includes('lista'))) {
+            continue; // Pomijamy taki nagłówek
+          }
+
+          // Czyszczenie punktorów
+          var cleanLine = line.replace(/^[-*•\d+.]\s*/, '').trim();
+          if (cleanLine.length > 2) {
+            aiImportedItems.push({
               id: Date.now() + j,
-              item: line,
-              pTrip: "Akcesoria Wyjazdowe",
-              tag: "ai_import",
-              mode: "trip"
-            };
-            tripDb.push(itemObj2);
-            activeTripWardrobeIds[itemObj2.id] = true;
+              item: cleanLine,
+              pTrip: "Akcesoria Wyjazdowe"
+            });
             addedCount++;
           }
         }
 
         if (addedCount > 0) {
-          saveDatabases();
-          saveActiveTripWardrobe();
+          saveAiImportedItems();
           closeClaudeModal();
-          populateWardrobeDropdown();
           drawChecklist();
-          alert("Pomyślnie zaimportowano " + addedCount + " przedmiotów z tekstu!");
+          alert("Pomyślnie zaimportowano " + addedCount + " przedmiotów!");
         } else {
           alert("Nie udało się odczytać żadnych pozycji z wklejonego tekstu.");
         }
       }
+    }
+
+    // Edycja zaimportowanego przedmiotu AI
+    function editAiItem(id) {
+      var target = null;
+      for(var i=0; i<aiImportedItems.length; i++) {
+        if(aiImportedItems[i].id === id) {
+          target = aiImportedItems[i];
+          break;
+        }
+      }
+      if(!target) return;
+
+      var newName = prompt("Edytuj nazwę przedmiotu:", target.item);
+      if(newName !== null && newName.trim() !== "") {
+        target.item = newName.trim();
+        saveAiImportedItems();
+        drawChecklist();
+      }
+    }
+
+    // Dodanie przedmiotu AI na stałe do Szafy
+    function saveAiItemToWardrobe(id) {
+      var target = null;
+      for(var i=0; i<aiImportedItems.length; i++) {
+        if(aiImportedItems[i].id === id) {
+          target = aiImportedItems[i];
+          break;
+        }
+      }
+      if(!target) return;
+
+      var newItemObj = {
+        id: Date.now(),
+        item: target.item,
+        pTrip: target.pTrip || "Akcesoria Wyjazdowe",
+        tag: "szafa_custom",
+        mode: "trip",
+        rule: "fixed"
+      };
+
+      tripDb.push(newItemObj);
+      saveDatabases();
+      populateWardrobeDropdown();
+      alert("Przedmiot „" + target.item + "” został zapisany na stałe w Twojej Szafie!");
+    }
+
+    // Usunięcie przedmiotu AI z listy wyjazdu
+    function removeAiItem(id) {
+      aiImportedItems = aiImportedItems.filter(function(i) { return i.id !== id; });
+      delete checkedSet[id];
+      saveAiImportedItems();
+      drawChecklist();
     }
     // --------------------------------------------------------------------
 
@@ -729,7 +790,8 @@
         name: presetName,
         tags: JSON.parse(JSON.stringify(myTags)),
         numDays: numDays,
-        activeWardrobeIds: JSON.parse(JSON.stringify(activeTripWardrobeIds))
+        activeWardrobeIds: JSON.parse(JSON.stringify(activeTripWardrobeIds)),
+        aiImportedItems: JSON.parse(JSON.stringify(aiImportedItems))
       };
 
       if(!savedPresets[presetTargetMode]) savedPresets[presetTargetMode] = [];
@@ -762,6 +824,10 @@
       if(target.activeWardrobeIds) {
         activeTripWardrobeIds = JSON.parse(JSON.stringify(target.activeWardrobeIds));
         saveActiveTripWardrobe();
+      }
+      if(target.aiImportedItems) {
+        aiImportedItems = JSON.parse(JSON.stringify(target.aiImportedItems));
+        saveAiImportedItems();
       }
 
       refreshTagUI();
@@ -948,6 +1014,11 @@
 
       myTags = { "baza": true, "fg": true };
       localStorage.setItem('packtactics_my_tags', JSON.stringify(myTags));
+      
+      // Czyszczenie zaimportowanych rzeczy od AI
+      aiImportedItems = [];
+      saveAiImportedItems();
+      
       checkedSet = {};
 
       refreshTagUI();
@@ -1116,6 +1187,14 @@
         }
       }
 
+      // Dołączenie rzeczy zaimportowanych od AI w trybie wyjazdu
+      var aiItemsToDisplay = [];
+      if (curMode === 'trip') {
+        for(var a=0; a<aiImportedItems.length; a++) {
+          aiItemsToDisplay.push(aiImportedItems[a]);
+        }
+      }
+
       var groups = {};
       for(var j=0; j<list.length; j++) {
         var item = list[j];
@@ -1124,7 +1203,20 @@
         groups[pocket].push(item);
       }
 
-      var totalCount = list.length;
+      // Grupowanie rzeczy AI
+      for(var ai=0; ai<aiItemsToDisplay.length; ai++) {
+        var aItem = aiItemsToDisplay[ai];
+        var aPocket = aItem.pTrip || 'Akcesoria Wyjazdowe';
+        if(!groups[aPocket]) groups[aPocket] = [];
+        // Oznaczamy obiekt flagą isAiImport dla renderowania specjalnych przycisków
+        groups[aPocket].push({
+          id: aItem.id,
+          item: aItem.item,
+          isAiImport: true
+        });
+      }
+
+      var totalCount = list.length + aiItemsToDisplay.length;
       var checkedCount = 0;
 
       var keys = Object.keys(groups);
@@ -1142,21 +1234,33 @@
           if(isC) checkedCount++;
           
           var lbl = o.item;
-          var qty = computeQuantity(o);
-          if(qty !== null && qty > 1) {
-            lbl = o.item + ' (' + qty + ' szt.)';
+          if(!o.isAiImport) {
+            var qty = computeQuantity(o);
+            if(qty !== null && qty > 1) {
+              lbl = o.item + ' (' + qty + ' szt.)';
+            }
           }
 
-          var deleteBtnHtml = activeTripWardrobeIds[o.id] ?
-            '<button type="button" onclick="removeFromChecklist(' + o.id + ')" class="text-slate-500 hover:text-amber-400 text-xs px-2 py-1 transition font-bold" title="Ukryj">✕</button>' :
-            '<button type="button" onclick="deleteDbItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń z szafy">✕</button>';
+          var actionButtonsHtml = "";
+          if (o.isAiImport) {
+            // Przyciski dla przedmiotów AI: edycja, plus do szafy, krzyżyk usunięcia
+            actionButtonsHtml = '<div class="flex items-center gap-1.5">' +
+              '<button type="button" onclick="editAiItem(' + o.id + ')" class="text-slate-400 hover:text-emerald-400 text-xs px-1.5 py-1 transition font-bold" title="Edytuj nazwę">✏️</button>' +
+              '<button type="button" onclick="saveAiItemToWardrobe(' + o.id + ')" class="text-slate-400 hover:text-emerald-400 text-xs px-1.5 py-1 transition font-bold" title="Dodaj na stałe do Szafy">➕</button>' +
+              '<button type="button" onclick="removeAiItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-1.5 py-1 transition font-bold" title="Usuń z listy">✕</button>' +
+              '</div>';
+          } else {
+            actionButtonsHtml = activeTripWardrobeIds[o.id] ?
+              '<button type="button" onclick="removeFromChecklist(' + o.id + ')" class="text-slate-500 hover:text-amber-400 text-xs px-2 py-1 transition font-bold" title="Ukryj">✕</button>' :
+              '<button type="button" onclick="deleteDbItem(' + o.id + ')" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition font-bold" title="Usuń z szafy">✕</button>';
+          }
 
           html += '<div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition">' +
             '<label class="flex items-start gap-3 cursor-pointer flex-1 mr-2">' +
             '<input type="checkbox" ' + (isC ? 'checked' : '') + ' onchange="toggleBox(' + o.id + ')" class="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900">' +
             '<div><span class="text-sm block ' + (isC ? 'line-through text-slate-500' : 'text-slate-200') + '">' + lbl + '</span></div>' +
             '</label>' +
-            deleteBtnHtml +
+            actionButtonsHtml +
             '</div>';
         }
 
